@@ -309,6 +309,8 @@ Combining Eq.~\eqref{eq:infl-step-k} and~\eqref{eq:infl-step-k+1}, we obtain:
         &+ \underbrace{\sum_{G^- \in {VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \mathds{1}\big(z(v_i,v_k|G_j^+)\big) }_{m_{ik}}. \label{eq:two-parts}
 \end{align}
 
+\input{si-fig-matrix-computation-example}
+
 \textbf{Tweet influence at previous time step $t_{k-1}$.}
 Given the definition of $G_j^+$ in Eq.~\eqref{eq:diff-scenario-increase}, we obtain that $\mathds{P}(G_j^+) = \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big)$.
 Consequently, part $A$ in Eq.~\eqref{eq:two-parts} can be written as:
@@ -341,8 +343,6 @@ Note that $\sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) = 1$ because $v_k$ is 
 %\[
 %A  =\varphi^{k-1}(u_j)
 %\]
-
-\input{si-fig-matrix-computation-example}
 
 \textbf{Contribution of $v_k$.}
 With $A$ being the influence of $v_i$ at the previous time step, intuitively $m_{ik}$ is the contribution of $v_k$ to the influence of $v_i$.
@@ -409,6 +409,8 @@ Intuitively, the influence of $v_i$ at time $t_k$ is the sum of the expected inf
 %\begin{equation}
 %\varphi^k(u_j) = \sum_{i=1}^k M_{ji} \text{   , with } M_{ji} = 0, \text{   for } i \leq j
 %\end{equation}
+
+\input{fig2-new-vs-old-infl}
 
 \subsection{Tweet influence algorithm}
 

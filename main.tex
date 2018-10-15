@@ -13,8 +13,8 @@
 \setlength{\pdfpageheight}{11in}  %Required
 %PDF Info Is Required:
  \pdfinfo{
-	/Title (\#DebateNight: The Role and Influence of Socialbots on Twitter During the 1st 2016 U.S. Presidential Debate)
-	/Author (Marian-Andrei Rizoiu, Timothy Graham, Rui Zhang, Yifei Zhang, Robert Ackland, Lexing Xie)
+	/Title (User influence estimation from retweet cascades with latent structure)
+	/Author (Marian-Andrei Rizoiu, Rohit Ram, Lexing Xie)
 }
 \setcounter{secnumdepth}{2}  
 %%%%%%%%%%%% additional packages
@@ -54,7 +54,7 @@
 \usepackage{subfig}
 \usepackage{epstopdf}
 \DeclareGraphicsExtensions{.png,.pdf,.eps,.jpg,.tif,.tiff,.ps} %MAR: moving PNG first
-\graphicspath{{img//}{img/yifei-work//}{img/wordclouds//}}
+\graphicspath{{img//}{img/yifei-work//}{img/wordclouds//}{img/new-vs-old-infl//}}
 
 %RJA added for \citet{} loved by social scientists the world over...
 %\usepackage{natbib}
@@ -164,10 +164,10 @@
 % proceedings, working notes, and technical reports.
 %
 %\title{The role and influence of socialbots within retweet diffusion cascades during the 1st U.S. Presidential Debate (\debate)}
-\title{\debate: The Role and Influence of Socialbots on Twitter\\During the 1st 2016 U.S. Presidential Debate}
+\title{User influence estimation from retweet cascades with latent structure}
 \author{
-	Rohit Ram\textsuperscript{1}
-	\and Marian-Andrei Rizoiu\textsuperscript{1}\textsuperscript{2} 
+	Marian-Andrei Rizoiu\textsuperscript{1}\textsuperscript{2} 
+	\and Rohit Ram\textsuperscript{1}
 	\and Lexing Xie\textsuperscript{1}\textsuperscript{2}\\ 
 	\textsuperscript{1}The Australian National University,
 	\textsuperscript{2}Data61 CSIRO\\
@@ -180,9 +180,9 @@
 	\input{0-abstract}
 \end{abstract}
 
-\input{1-correct-infl-estimation}
-%
-%\input{2-related-work}
+\input{1-2-correct-infl-estimation}
+
+\input{3-changes-from-old-influence-estimation}
 %
 %\input{3-tweet-influence}
 %
