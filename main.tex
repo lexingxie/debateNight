@@ -2,6 +2,7 @@
 %File: formatting-instruction.tex
 \documentclass[letterpaper]{article} %DO NOT CHANGE THIS
 \usepackage{aaai18}  %Required
+\nocopyright
 \usepackage{times}  %Required
 \usepackage{helvet}  %Required
 \usepackage{courier}  %Required
@@ -58,7 +59,6 @@
 %RJA added for \citet{} loved by social scientists the world over...
 %\usepackage{natbib}
 %but it messes with citation style already being used, so define \citet{} here:
-%\newcommand{\citet}[1]{\citeauthor{#1} (\citeyear{#1})}
 \newcommand{\citet}[1]{\citeauthor{#1}~\shortcite{#1}}
 \newcommand{\citep}{\cite}
 \newcommand{\citealp}[1]{\citeauthor{#1}~\citeyear{#1}}
@@ -166,10 +166,9 @@
 %\title{The role and influence of socialbots within retweet diffusion cascades during the 1st U.S. Presidential Debate (\debate)}
 \title{\debate: The Role and Influence of Socialbots on Twitter\\During the 1st 2016 U.S. Presidential Debate}
 \author{
-	Marian-Andrei Rizoiu\textsuperscript{1}\textsuperscript{2} 
-	\and Timothy Graham\textsuperscript{1} 
-	\and Rui Zhang\textsuperscript{1}\textsuperscript{2}  \\
-	{\bf \Large \and Yifei Zhang\textsuperscript{1}\textsuperscript{2} \and Robert Ackland\textsuperscript{1} \and Lexing Xie\textsuperscript{1}\textsuperscript{2}} \\
+	Rohit Ram\textsuperscript{1}
+	\and Marian-Andrei Rizoiu\textsuperscript{1}\textsuperscript{2} 
+	\and Lexing Xie\textsuperscript{1}\textsuperscript{2}\\ 
 	\textsuperscript{1}The Australian National University,
 	\textsuperscript{2}Data61 CSIRO\\
 	Canberra, Australia.\\
@@ -181,35 +180,35 @@
 	\input{0-abstract}
 \end{abstract}
 
-\input{1-introduction}
-
-\input{2-related-work}
-
-\input{3-tweet-influence}
-
-\input{4-measures-dataset}
-
-\input{5-evaluation-user-influence}
-
-\input{6-results-findings}
-
-\input{7-conclusion}
-
-\vspace{0.2cm}
-\noindent{%\small
-\textbf{Acknowledgments.}
-This research is sponsored in part by the Air Force Research Laboratory, under agreement number FA2386-15-1-4018.
-%We thank the National Computational Infrastructure (NCI) for providing computational resources, supported by the Australian Government.
-}
+\input{1-correct-infl-estimation}
+%
+%\input{2-related-work}
+%
+%\input{3-tweet-influence}
+%
+%\input{4-measures-dataset}
+%
+%\input{5-evaluation-user-influence}
+%
+%\input{6-results-findings}
+%
+%\input{7-conclusion}
+%
+%\vspace{0.2cm}
+%\noindent{%\small
+%\textbf{Acknowledgments.}
+%This research is sponsored in part by the Air Force Research Laboratory, under agreement number FA2386-15-1-4018.
+%%We thank the National Computational Infrastructure (NCI) for providing computational resources, supported by the Australian Government.
+%}
 
 { %\small
-\fontsize{9.0pt}{10.0pt}
-%\fontsize{9.5pt}{10.5pt}
-\selectfont
-\bibliography{paper}
-\bibliographystyle{aaai}
+	\fontsize{9.0pt}{10.0pt}
+	%\fontsize{9.5pt}{10.5pt}
+	\selectfont
+	\bibliography{paper}
+	\bibliographystyle{aaai}
 }
 
-\input{appendix}
+%\input{appendix}
 
 \end{document}

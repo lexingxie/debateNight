@@ -1,13 +1,7 @@
 %!TEX root = main.tex
 %
-\newpage
-\appendix
-%
-\etocdepthtag.toc{mtappendix}
-\etocsettagdepth{mtchapter}{none}
-\etocsettagdepth{mtappendix}{subsection}
-\etoctocstyle{1}{Contents (Appendix)}
-\tableofcontents
+%\newpage
+%\appendix
 
 \section{Derivation of the influence formula}
 \label{si-sec:infl-derivation}
@@ -173,7 +167,7 @@ We measure the local influence of a user using his number of followers~\cite{kwa
 %So the probability of retweeting can be express in the following equation:
 We quantify the probability of an edge as:
 \begin{equation} \label{eq:prob-edge}
-	\mathds{P}(\{v_a, v_b\}) = m_a e^{-r({t_{b}-t_{a}})}
+	p_{ab} = \mathds{P}(\{v_a, v_b\}) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
 \end{equation}
 %This equation describe the probability that user $u_b$ retweet from user $u_a$ 
 where 
@@ -456,114 +450,3 @@ For each column $j$, we compute the first $j-1$ elements by multiplying the sub-
 The computation of matrix $M$ finishes in linear time, after $n$ steps, where $n$ is the total number of retweets in the retweet cascade.
 Fig.~\ref{fig:matrix-operations-example} demonstrated the computation of the first four columns in $M$.
 Algorithm~\ref{alg:casin} gives an overview of the efficient influence computation algorithm.
-
-\begin{figure*}[tbp]
-	\centering
-	\newcommand\mywidth{0.3}
-	\subfloat[] {
-		\includegraphics[width=\mywidth\textwidth, page=1]{2017-11-28-2d-density-map-influence-botscore}
-	}
-	\subfloat[] {
-		\includegraphics[width=\mywidth\textwidth, page=2]{2017-11-28-2d-density-map-influence-botscore}
-	}
-	\subfloat[] {
-		\includegraphics[width=\mywidth\textwidth, page=3]{2017-11-28-2d-density-map-influence-botscore}
-	}
-	\caption{
-		2D density plots for all politically polarized users in \debate \textbf{(a)}, for Democrat users \textbf{(b)} and for Republican users \textbf{(c)}.
-	}
-	\label{si-fig:additional-2d}
-%	\captionmoveup
-\end{figure*}
-
-\section{Generation of synthetic data}
-\label{si-sec:generation-artificial}
-
-This section completes and details the results concerning the evaluation on synthetic data, presented in the main text Sec.~\ref{subsec:ground-truth}.
-This section details the construction of a synthetic random social graph (Sec.~\ref{si-subsec:random-graph}) and the sampling of synthetic cascades (Sec.~\ref{si-subsec:random-sampling}).
-The purpose is to construct a synthetic dataset of cascades, in which the user influence ground truth is known.
-Both the graph and cascade generators described here below reproduce closely the synthetic experimental setup described in~\cite{Du2013}.
-
-\subsection{Generation of random graphs}
-\label{si-subsec:random-graph}
-
-In this section, we describe the construction of a synthetic social graph, with $n$ nodes, specified by its adjacency matrix $M$.
-Each node corresponds to a synthetic user, and the edges correspond to synthetic follow relations.
-We follow the below steps:
-\begin{itemize}
-	\item Given the number of nodes $n$ in the graph (here $1000$), create an null (all zero) adjacency matrix $M$ of size $n \times n$;
-	\item Randomly choose the number of edges $|E|$, between $n/2$ to $n^2$.
-	\item Randomly choose $i$ and $j$ between $1$ to $n$ and set $M_{ij}$ to $1$. Iterate this step until $|E|$ different edges are generated.
-	\item The adjacency matrix $M$ defines the final random graph.
-\end{itemize}
-
-\subsection{Sampling synthetic cascades}
-\label{si-subsec:random-sampling}
-
-In this section we describe how to construct synthetic cascades, given a synthetic social graph $G$ constructed as shown in Sec.~\ref{si-subsec:random-graph}.
-To generate one cascades, to each edge in $G$ we associate an exponentially distributed waiting time and we construct a shortest path tree.
-We detail this procedure in the following steps:
-
-\begin{itemize}
-	\item Similar to previous work (ConTinEst~\cite{Du2013}), for each edge $\{v_i, v_j\} \in G$ draw a transmission rate $r_{ij}$ from a Weibull distribution of shape $k = 2$.
-	\item Given the transmission rate $r_{ij}$, we draw an Exponentially distributed waiting time $\tau_{ij}$ using the inverse transform sampling:
-		$$\tau_{ij} = -\frac{ln(s)}{r_{ij}}$$  
-	where $s$ is draw uniformly from $U(0,1)$.
-	\item Set $\tau_{ij}$ as the weight of edge $\{v_i, v_j\}$.
-	\item Starting from a source node $v_s$, construct the shortest path tree from $v_s$ to all the other nodes in $G$;
-	\item For each node $v_k$ compute two measures:
-		$t_k$ -- its time of occurrence as the total waiting time along the path from $v_s$ to $v_k$ -- and
-		$c_k$ -- the number of reachable nodes from $v_k$ in the shortest path tree;
-	\item The generated cascade is $\{t_1,t_2,t_3 \cdots t_n\}$  where $(t_1 < t_2 < t_3 < \cdots t_n)$;
-	\item The ground truth influence of node $v_k$ is the mean $c_k$ over multiple random graphs (here 100).
-\end{itemize}
-
-\section{Choosing the temporal decay parameter}
-\label{si-sec:choose-temp-decay}
-
-The temporal decay parameter $r$ shown in Eq.~\eqref{eq:prob-edge-mt} is determined by linear search. 
-Eq.~\eqref{eq:prob-edge-mt} measures the probabilities of edges in the retweeting (diffusion) network, however the real diffusions are not observed.
-We make the assumption that diffusions occur along edges in the underlying social graph (follower relation).
-We measure the fitness of edge probability by the likelihood of uncovering the ground truth follower graph.
-In other words, if the edge $\{v_i, v_j\}$ exists in the follower graph (i.e. $v_j$ is a follower of $v_i$) then the edge $\{v_i, v_j\}$  has the highest probability in the diffusion tree than the edge $\{v_l, v_j\}$ which does not exist in the following graph.
-In other words, we are using the retweeting probability to predict the existence of edges in the social graph.
-We randomly select 20 cascades, and we crawl the following list of every user appearing the the diffusions (the following list for a user $u_j$ consists of users $u_i$ followed by $u_j$).
-We use this information as ground truth for the following prediction exercise:
-given a user $u_j$ who emitted tweet $v_j$ in a particular cascade, we want to predict which among the users in the set $\{u_1, u_2, \ldots, u_{j-1}\}$ are followed by $u_j$.
-Considering that $\mathds{P}(\{v_l, v_j\}). \forall l < j, j \geq 2$ are real numbers and the prediction target is binary, we use the AUC (are under ROC curve) the measure the prediction performance of a particular probability scoring function.
-For each value of $r$ in Eq.~\eqref{eq:prob-edge-mt} we compute the mean AUC over all predictions.
-We perform a linear search for the optimal $r$ between $10^{-8}$ to $3$. 
-Finally, $6.2\times10^{-4}$ maximizes the mean of AUC and it is chosen as $r$ value in the experiments in Sec.~\ref{sec:evaluation-influence} and~\ref{sec:results-findings}.
-%
-%
-% and using it over a cascade can generate a probabilistic retweeting network. 
-%Nevertheless, the real retweeting network is unavailable so we use the friend network as the ground truth. Friends of a user on Twitter refer to users followed by him/her. That is, in a cascade a tweet A is from a tweet B if and only if the owner of B is 
-%a friend of (followed by) the owner of A, which gives labels of edges .  By now, we have clarified probabilities and labels of edges in retweeting networks. As a choice to measure the performance of Eq. \ref{eq:prob-edge-mt}, AUC (Area Under Curve) is exploited in our experiments, which uses probabilities and labels of in-links of a node in the retweeting network. In other words, from the second tweet to the last one in a cascade, each owns a AUC calculated based on its in-links' probabilities and labels. We select 20 cascades to measure the performance and vary $r$ from $10^{-8}$ to $3$. Finally, $6.2\times10^{-4}$ maximizing the mean of AUC's is chosen as $r$.
-%
-%\TODO{MAR}{This is not clear! We need more details: 1) what is a friend in Twitter? 2) how many users were there in those 20 cascades 3) how do you use AUC, what probability do you use? 4) what is the domain of varying $r$ in the linear search?}
-
-\section{Additional 2D densities plots}
-\label{si-sec:polarization-map}
-
-We show in Fig.~\ref{si-fig:additional-2d} the additional 2D density plots mentioned in the main text Sec.~\ref{subsec:user-influence-results}.
-
-%\section{Content analysis of hashtags}
-%\label{si-sec:hashtag-analysis}
-%
-%Content analysis~\cite{kimkuljis2010} was used to code the 1000 most frequently occurring hashtags according to their political polarity. More specifically, we used 
-%Directed Content Analysis~\cite{hsieh-shannon-2005} to contextually analyse hashtags and code them according to their political polarity (or not, denoted as `neutral' and subsequently excluded from analysis). 
-%This approach has been used in previous work to study hashtags on Twitter in a manner that is valid, reliable and replicable~\cite{small-2011}. 
-%There were two previous studies of Twitter activity during the 2016 US presidential election that informed the development of our coding schema. 
-%Firstly, \citet{FM7090} devised a binary classification scheme that attributed political partisanship to a small set of key hashtags as either `Trump-supporting' (\#donaldtrump, \#trump2016, \#neverhillary, \#trumppence16, \#trump) or `Clinton-supporting' (\#hillaryclinton, \#imwithher, \#nevertrump, \#hillary). 
-%Secondly, in studying Twitter activity during the 1st US presidential debate~\cite{Kollanyi.2016.presidentialdebate} developed a coding schema that categorized tweets into seven categories based on the hashtags that occurred within the tweet. 
-%However, the authors found that three `exclusive' categories (`Pro-Trump', `Pro-Clinton', and `Neutral') accounted for the majority (88.5\%) of observations. 
-%
-%Given the findings of previous research, we developed a code book with three categories: `Pro-Trump', `Pro-Clinton', and `Neutral'. 
-%To ensure that hashtags were analysed within context, our content analysis methodology focussed on three units of analysis (following the approach developed by~\citet{small-2011}). 
-%The first is hashtags, comprised of a set of the 1000 most frequently occurring hashtags over all tweets in our dataset. 
-%The second unit of analysis was individual tweets that contained these hashtags. 
-%In order to gain a more nuanced and `situated' interpretation of hashtag usage, for each hashtag we referred to a small random sample of tweets in our dataset that contained each given hashtag. 
-%In some instances the polarity (or neutrality) was clear and/or already determined from previous studies, which helped to speed up the analysis of tweets. 
-%The third unit of analysis was user profiles, which we referred to in situations where the polarity or neutrality of a given hashtag was unclear from the context of tweet analysis. 
-%For example, \#partyoflincoln was used by both Republican and Democrat Twitter users, but an analysis of both tweets and user profiles indicated that this hashtag was \textit{predominantly} used by Pro-Trump supporters to positively align the Republican Party with the renowned historical figure of President Abraham Lincoln, who was a Republican. 
-%The content analysis resulted in a subset of 93 pro-Democrat and 86 pro-Republican hashtags (a wordcloud visualization was given in Fig.~\ref{fig:wordclouds}), whilst the remaining `neutral' hashtags were subsequently excluded from further analysis.
