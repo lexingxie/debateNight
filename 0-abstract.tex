@@ -1,4 +1,7 @@
 %!TEX root = main.tex
 %
 Estimating user influence from retweet cascades is a difficult task due to data availability -- the diffusion structure is typically unobserved -- and to the data size -- with millions of users interacting in short periods of time.
-In this document, we revisit the mathematical ... a recently proposed influence estimation algorithm~\citep{Rizoiu2018a}
+In this document, we revisit the mathematical model behind a recently proposed influence estimation algorithm~\citep{Rizoiu2018a} allowing influence estimation with latent structure.
+We define the pair-wise influence as the probability of a tweet being retweeted, and we compute the probability of a diffusion scenario -- a diffusion tree consistent with an observed discussion cascade.
+Finally, we compute the tweet influence as the expected number of retweets it obtains, over all possible diffusion trees.
+We detail a cubic complexity influence estimation algorithm, which scales to the amounts of data observed in social media originating data.
