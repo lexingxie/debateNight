@@ -306,7 +306,7 @@ Combining Eq.~\eqref{eq:infl-step-k} and~\eqref{eq:infl-step-k+1}, we obtain:
 \begin{align}
 \varphi^k(v_i) &= \sum_{\substack{G^-\\\in VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \bigg[ \varphi(v_i | G^-) + \mathds{1}\big(z(v_i,v_k|G_j^+)\big) \bigg] \nonumber \\
         &= \underbrace{\sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \sum^{k-1}_{j=1}\mathds{P}(G_j^+) }_{A} \nonumber \\
-        &+ \underbrace{\sum_{G^- \in {VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \mathds{1}\big(z(v_i,v_k|G_j^+)\big) }_{M_{ik}}. \label{eq:two-parts}
+        &+ \underbrace{\sum_{G^- \in {VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \mathds{1}\big(z(v_i,v_k|G_j^+)\big) }_{m_{ik}}. \label{eq:two-parts}
 \end{align}
 
 \textbf{Tweet influence at previous time step $t_{k-1}$.}
@@ -345,14 +345,14 @@ Note that $\sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) = 1$ because $v_k$ is 
 \input{si-fig-matrix-computation-example}
 
 \textbf{Contribution of $v_k$.}
-With $A$ being the influence of $v_i$ at the previous time step, intuitively $M_{ik}$ is the contribution of $v_k$ to the influence of $v_i$.
+With $A$ being the influence of $v_i$ at the previous time step, intuitively $m_{ik}$ is the contribution of $v_k$ to the influence of $v_i$.
 Knowing that:
 \begin{align*}
 	\mathds{P}(G_j^+) &= \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \text{ and } \\
 	\mathds{1}\big(z(v_i,v_k|G_j^+)\big) &= \mathds{1}\big(z(v_i,v_j|G^+_j)\big) \mathds{1}\big((v_j,v_k)\big) \\
 	 &= \mathds{1}\big(z(v_i,v_j|G^-)\big)
 \end{align*}
-we write $M_{ik}$ as:
+we write $m_{ik}$ as:
 %
 %The only problem left is to compute $M_{jk}$ which is part $B$. The basic idea here is also to derive the relation between $t_k$ and $t_k-1$ by using the observation we have discussed.  
 %\begin{align}
@@ -361,7 +361,7 @@ we write $M_{ik}$ as:
 %\end{align}
 %We know that $G_i = G\cup (v_i,v_k)$ thus $\mathds{P}\{G_i\} = \mathds{P}\{G_i\} \mathds{P}(v_i,v_k)$ and $\mathds{P}\{z(u_j,v_k|G_i)\} = \mathds{P}\{z(u_j,v_i|G)\}\mathds{P}(v_i,v_k)$ so: 
 \begin{align}
-	M_{ik} &= \sum_{G^- \in {VG^{k-1}}} \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \mathds{1}\big(z(v_i,v_j|G^-)\big) \nonumber \\
+	m_{ik} &= \sum_{G^- \in {VG^{k-1}}} \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \mathds{1}\big(z(v_i,v_j|G^-)\big) \nonumber \\
            &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) \underbrace{ \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \mathds{1}\big(z(v_i,v_j|G^-)\big)}_{M_{ij}} \nonumber \\  
 		   &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) M_{ij} \label{eq:M-ik}
 \end{align}
@@ -373,16 +373,16 @@ we write $M_{ik}$ as:
 %M_{jk} &= \sum_{i=1}^{k-1}\bigg[\mathds{P}^2(v_i,v_k)M_{ji}\bigg]
 %\end{alignedat}
 %\]
-An alternative interpretation for $M_{ik}$ is the influence of $v_i$ over $v_k$.
+An alternative interpretation for $m_{ik}$ is the influence of $v_i$ over $v_k$.
 Eq.~\eqref{eq:M-ik} can be intuitively understood as the expected influence of $v_i$ over a newly attached node $v_k$ is proportional to the influence of $v_i$ over each already attached node $v_j$ multiplied with the likelihood that $v_k$ attached itself to $v_j$.
 We obtain the formula of the the expected influence of a node $v_i$ over another node $v_k$ as:
 %
 %Through this equation we can observed that $M_{jk}$ which is the influence $u_j$ over $v_k$ can be recursively calculated using $\mathds{P}(v_i,v_k)$ and $M_{ji}$ which is influence $u_j$ over $v_i$ where $v_i$ is the user that $v_k$ attach to.  Any user in a diffusion can not have the influence on any previous user because there is no directed path pointing back to the previous user. Therefore $M_{jk}(j>k)$ equals zero and the influence on the user itself set to one in default.
 \begin{equation} \label{eq:Mij}
-M_{ik}=
+m_{ik}=
 \left\{
 \begin{array}{ll}
-	\sum^{k-1}_{j=1}M_{ij}\mathds{P}\big((v_j, v_k)\big) &,i < k \\
+	\sum^{k-1}_{j=1}m_{ij}\mathds{P}\big((v_j, v_k)\big) &,i < k \\
 	1 & ,i = k \\
 	0 & ,i > k.
 \end{array}
@@ -397,11 +397,11 @@ Using Eq~\eqref{eq:two-parts} and~\eqref{eq:past-infl}, we can recursively compu
 %Therefore, the rest of the part B is actually the influence that user $v_k$ contribute when it is added at $t_k$. 
 %If we define $M_{jk} = B = \sum_{G\in{VG^{k}}}\mathds{P}(G)\mathds{P}\{z(u_j,v_k|G)\}$ as $M_{jk}$ which is the influence that $u_j$ exerts on $v_k$.
 \begin{align}
-	\varphi^k(v_i) &= \varphi^{k-1}(v_i) + M_{ik} \nonumber \\
-				   &= \varphi^{k-2}(v_i) + M_{i(k-1)} + M_{ik} \nonumber \\
-				   &= \sum_{j=1}^k M_{ij}. 
+	\varphi^k(v_i) &= \varphi^{k-1}(v_i) + m_{ik} \nonumber \\
+				   &= \varphi^{k-2}(v_i) + m_{i(k-1)} + m_{ik} \nonumber \\
+				   &= \sum_{j=1}^k m_{ij}. 
 \end{align}
-with $M_{ij}$ as defined in Eq.~\eqref{eq:Mij}.
+with $m_{ij}$ as defined in Eq.~\eqref{eq:Mij}.
 Intuitively, the influence of $v_i$ at time $t_k$ is the sum of the expected influence over each of the nodes in the diffusion scenario.
 
 %Therefore, the influence of $u_j$ computed at time $t_k$ when $v_k$ is added can be obtained through the influence of $u_j$ at $t_{k-1}$ and the influence that $v_k$ contribute to $u_j$. 
@@ -415,9 +415,9 @@ Intuitively, the influence of $v_i$ at time $t_k$ is the sum of the expected inf
 We define two matrices:
 matrix $P = [ P_{ij} ]$, with $P_{ij} = \mathds{P}\big((v_i, v_j)\big)$.
 Element $P_{ij}$ of the matrix $P$ is the probability that tweet $v_j$ is a direct retweet of tweet $v_i$;
-matrix $M = [ M_{ij} ]$, with $M_{ij}$ defined in Eq.~\eqref{eq:Mij}.
-Element $M_{ij}$ of matrix $M$ is the contribution of $v_j$ to the influence of $v_i$.
-Alternatively, $M_{ij}$ can be interpreted as the influence of $v_i$ on $v_j$.
+matrix $M = [ m_{ij} ]$, with $m_{ij}$ defined in Eq.~\eqref{eq:Mij}.
+Element $m_{ij}$ of matrix $M$ is the contribution of $v_j$ to the influence of $v_i$.
+Alternatively, $m_{ij}$ can be interpreted as the influence of $v_i$ on $v_j$.
 
 From Eq.~\eqref{eq:Mij} follows the formula for computing iteratively the columns of matrix $M$:
 \begin{equation} \label{eq:Mij-matrix}
