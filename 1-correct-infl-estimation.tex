@@ -113,12 +113,7 @@ Every retweet cascades constructed based on raw retweet information from the Twi
 Due to this particular shape, we denote retweet cascades as \emph{stars}.
 However, the API exposes the time of arrival of the retweets $t_i$.
 We denote as a \emph{diffusion scenario} any valid diffusion tree that could be associated with the observed retweet star -- i.e., the edges in the diffusion tree respects the order of arrival of retweets.
-%
-%We denote the valid diffusion trees that could generate an observed star as \emph{diffusion scenarios}.
 Fig.~\ref{fig:side:b} shows four examples of diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.
-%Since we only observe the times when certain node are added through diffusion process, there are many possible diffusion scenarios that explain a observed cascades Fig.~\ref{fig:side:a} and .
-
-%A diffusion scenario can be regarded as one of these tree. 
 
 \textbf{Constructing diffusion scenarios.}
 %All possible diffusion scenarios need to be constructed. 
@@ -127,7 +122,7 @@ The node $v_1$ is the root node and it is published at time $t_1$;
 tweet $v_2$ occurs at time $t_2$ and it is undoubtedly a direct retweet of $v_1$ -- a directed edge is drawn from $v_1$ to $v_2$. 
 Tweet $v_3$ observed at $t_3$ can be a direct retweet of either tweet $v_1$ or tweet $v_2$.
 Therefore, at time $t_3$ there are two possible diffusion scenarios: 
-$G_1$ with the edge set $E = \lbrace (v_1, v_2), (v_1, v_3) \rbrace$ and $G_2$ with the edge set $E = \lbrace (v_1, v_2\}, (v_2, v_3\} \rbrace$.
+$G_1$ with the edge set $E = \lbrace (v_1, v_2), (v_1, v_3) \rbrace$ and $G_2$ with the edge set $E = \lbrace (v_1, v_2), (v_2, v_3) \rbrace$.
 Similarly, $v_4$ can be a direct retweet of $v_1$, $v_2$ or $v_3$, in either $G_1$ or $G_2$.
 Consequently, at time $t_4$ there are 6 possible diffusion scenarios.
 The process continues until all nodes have been attached.
@@ -144,20 +139,11 @@ For an observed star of size $k$, there are $(k-1)!$ associated diffusion scenar
 Given that in retweet cascades individual edges are not observed,
 %Given that edges in diffusion scenarios are not observed,
 %For diffusion scenarios, the edges (i.e. the direct retweet events) are not observed.
-we define the probability of an edge $\mathds{P}((v_a, v_b))$ as the likelihood that $u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
+we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that $u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
 %In line with previous work~\cite{crane2008robust,Mishra2016,Zhao2015,Shen2014,Yu2015},
 We model two factors in the likelihood of retweeting:
-%
-%To estimate user influence. 
-%Only obtaining all the possible diffusions scenarios is not enough. 
-%Given a possible diffusion scenario $G$, we also need to know the probability of retweeting which corresponding to the weight of each edge in $G$. 
-%More specifically, 
-%
-%Every edge $e$ correspond to a value representing the probability of retweeting. 
-%To model this probability, 
-%We model the probability of an edge using two assumptions: 
 firstly, users retweet \emph{fresh} content~\cite{Wu2007}.
-The probability of the edge $e$ decays exponentially with the time difference $t_b - t_a$;
+The probability of the edge $(v_a, v_b)$ decays exponentially with the time difference $t_b - t_a$;
 %The influence of user is exponential decay
 secondly, users prefer to retweet locally influential users, also known as preferential attachment~\cite{Barabasi2005}.
 We measure the local influence of a user using his number of followers~\cite{kwak2010twitter,Cha2010,Rizoiu2017}.
@@ -167,7 +153,7 @@ We measure the local influence of a user using his number of followers~\cite{kwa
 %So the probability of retweeting can be express in the following equation:
 We quantify the probability of an edge as:
 \begin{equation} \label{eq:prob-edge}
-	p_{ab} = \mathds{P}((v_a, v_b)) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
+	p_{ab} = \mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
 \end{equation}
 %This equation describe the probability that user $u_b$ retweet from user $u_a$ 
 where 
@@ -185,7 +171,7 @@ Under the assumption that retweeting events (i.e. edges) occur independently one
 %Each user $u_b$ will retweet from another user $u_a$ in its parent scenario with probability $\mathds{P}(u_a,u_b)$. 
 %As each rewteet represent an egde $e$ in diffusion scenario.Thus, we can obtain the probability of a diffusion scenarios $\mathds{P}(G)$ via:
 \begin{equation} \label{eq:prob-scenario}
-	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}((v_a, v_b))
+	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
 \end{equation}
 
 Note that the above assumption of independence of retweet events is a strong assumption.
@@ -198,6 +184,8 @@ The interdependence often observed in socially generated networks (like triadic 
 %e.g. reciprocity, triangles by construction 
 can be ignored in edge formation within a particular retweet cascade. 
 %It's a directed acyclic graph (if I've got the right term?)}
+
+\input{fig1-model}
 
 \subsection{Computing tweet influence}
 \label{subsec:user-influence}
@@ -222,12 +210,12 @@ Formally:
 %This $v_i$ can diffuse its tweet to any user $v_k \in U $ though the path $z(v_i,v_k)$ which is from $v_i$ to $v_k$.
 %The expected number of diffused user given a target user $v_i$ can be computed as: 
 \begin{equation}
-	\varphi(v_i|G) 	=  \sum_{v_k \in V(G)} \mathds{1} \{z(v_i,v_k | G) \} \label{eq:infl-in-a-scenario}
+	\varphi(v_i|G) 	=  \sum_{v_k \in V(G)} \mathds{1} \big(z(v_i,v_k | G) ) \label{eq:infl-in-a-scenario}
 \end{equation}
-where $\mathds{1} \left\lbrace z(v_i,v_k|G) \right\rbrace$ is a function that takes the value 1 when the path from $v_i$ to $v_k$ exists in $G$.
+where $\mathds{1} \left( z(v_i,v_k|G) \right)$ is a function that takes the value 1 when the path from $v_i$ to $v_k$ exists in $G$.
 %and the probability of path $z(v_i,v_k|G)$ can be obtained by the production over edges in this path $z$. That is:
 %\begin{equation}
-%	\mathds{P} \big(z(v_i,v_k|G) \big) = \prod_{\{u_a,u_b\} \in z} \mathds{P}\big(\{u_a,u_b\}\big).
+%	\mathds{P} \big\big(z(v_i,v_k|G) \big) = \prod_{\{u_a,u_b\} \in z} \mathds{P}\big(\{u_a,u_b\}\big).
 %\end{equation}
 
 \textbf{Tweet influence over a retweet cascade.}
@@ -268,17 +256,17 @@ As a result, we only keep track of how tweet influence increases over time steps
 
 \textbf{Incremental construction of diffusion scenarios.}
 Let $G^- \in VG^{k-1}$ be a diffusion scenario constructed at time $t_{k-1}$, with the set of nodes $V^- = \{ v_1,v_2,\cdots,v_{k-1} \}$.
-When $v_k$ arrives, it can attach to any node in $V^-$, generating $k-1$ new diffusion scenarios $G_j^+$, with $V_j^+ = V^- \cup v_k$ and $E_j^+ = E^- \cup (v_j, v_k\}$.
+When $v_k$ arrives, it can attach to any node in $V^-$, generating $k-1$ new diffusion scenarios $G_j^+$, with $V_j^+ = V^- \cup v_k$ and $E_j^+ = E^- \cup (v_j, v_k)$.
 This process is exemplified in Fig.~\ref{fig:add-one-edge}.
 We can write the set of scenarios at time $t_k$ as:
 \begin{equation} \label{eq:diff-scenario-increase}
-	VG^k = \left\lbrace G_j^+ = G^- \cup (v_j, v_k\} \middle| \forall j < k, \forall G^- \in VG^{k-1} \right\rbrace
+	VG^k = \left\lbrace G_j^+ = G^- \cup (v_j, v_k) \middle| \forall j < k, \forall G^- \in VG^{k-1} \right\rbrace
 \end{equation}     
 We write the tweet influence of $v_i$ at time $k$ as:
 %
 %
 %Following the description in Sec.~\ref{sec:user-influence}, users are sequentially attached to previous diffusion scenarios. 
-%When user $v_k$ is attached to previous diffusion scenarios constructed in time $k-1$ with a collection of users $U = \{u_1,u_2,u_3 \cdots,u_{k-1}\}$, for all $G \in VG^{k-1}$ at time $t_{k-1}$, each G can generates $k-1$ new scenario $G_i$ by adding edge $(v_i,v_k\}$ where $G_i = G\cup (v_i,v_k\}$.
+%When user $v_k$ is attached to previous diffusion scenarios constructed in time $k-1$ with a collection of users $U = \{u_1,u_2,u_3 \cdots,u_{k-1}\}$, for all $G \in VG^{k-1}$ at time $t_{k-1}$, each G can generates $k-1$ new scenario $G_i$ by adding edge $(v_i,v_k)$ where $G_i = G\cup (v_i,v_k)$.
 %$G$ is the parent diffusion scenario of $G_i$.
 % 
 %So $\varphi^k(u_j)$ can be written as:
@@ -290,7 +278,7 @@ Note that in Eq.~\eqref{eq:infl-step-k} we explicitly make use of how diffusion 
 
 \textbf{Attach a new node $v_k$.}
 We concentrate on the right-most factor in Eq.~\eqref{eq:infl-step-k} -- the tweet influence in scenario $G^+_j$.
-We observe that the terms in Eq.~\eqref{eq:infl-scenario-path} can be divided into two:
+We observe that the terms in Eq.~\eqref{eq:infl-in-a-scenario} can be divided into two:
 the paths from $v_i$ to all other nodes except $v_k$ (i.e. the old nodes) and the path from $z(v_i, v_k)$.
 We obtain:
 %
@@ -301,47 +289,47 @@ We obtain:
 %\end{equation*}
 %$\sum_{u_v\in{G_i};v>j}\mathds{P}\{z(u_j,u_v|G_i)\}$ can be decomposed into two parts. The first part the probability of all the paths from $u_j$ to other users except $v_k$ and the second part is the probability of path from $u_j$ to $v_k$:
 \begin{equation*}
-	\varphi(v_i|G_j^+) = \sum_{\substack{v_l\in{G_j^+}\\l>i, l\neq k}} \mathds{1}(z(v_i,v_l|G_j^+)) + \mathds{1}(z(v_i,v_k|G_j^+)).
+	\varphi(v_i|G_j^+) = \sum_{\substack{v_l\in{G_j^+}\\l>i, l\neq k}} \mathds{1}\big(z(v_i,v_l|G_j^+)\big) + \mathds{1}\big(z(v_i,v_k|G_j^+)\big).
 \end{equation*}
 Note that a path that does not involve $v_k$ has the same probability in $G_j^+$ and in its parent scenario $G^-$:
 \begin{equation*}
-	\mathds{1}(z(v_i,v_l|G_j^+)) = \mathds{1}(z(v_i,v_l|G^-)), \text{ for } l > i, l \neq k
+	\mathds{1}\big(z(v_i,v_l|G_j^+)\big) = \mathds{1}\big(z(v_i,v_l|G^-)\big), \text{ for } l > i, l \neq k
 \end{equation*}
 we obtain:
-%We make use of the fact that $G_i$ without edge $(v_i,v_k\}$ is equal to its parent scenario $G$. 
+%We make use of the fact that $G_i$ without edge $(v_i,v_k)$ is equal to its parent scenario $G$. 
 %So $\sum_{\substack{u_v\in{G_i}\\v>j\\v\neq k}}\mathds{P}\{z(u_j,u_v|G_i)\}$ is actually equal to $\sum_{\substack{u_v\in{G}\\v>j}}\mathds{P}\{z(u_j,u_v|G)\}$ then:
 \begin{align}
-				\varphi(v_i|G_j^+) 		&= \sum_{\substack{v_l\in{G^-}\\l>i}} \mathds{1}(z(v_i,v_l|G^-)) + \mathds{1}(z(v_i,v_k|G_j^+)) \nonumber \\
-^{cf.~\eqref{eq:infl-scenario-path}}	&= \varphi(v_i | G^-) + \mathds{1}(z(v_i,v_k|G_j^+)) \label{eq:infl-step-k+1}
+				\varphi(v_i|G_j^+) 		&= \sum_{\substack{v_l\in{G^-}\\l>i}} \mathds{1}\big(z(v_i,v_l|G^-)\big) + \mathds{1}\big(z(v_i,v_k|G_j^+)\big) \nonumber \\
+^{cf.~\eqref{eq:infl-in-a-scenario}}	&= \varphi(v_i | G^-) + \mathds{1}\big(z(v_i,v_k|G_j^+)\big) \label{eq:infl-step-k+1}
 \end{align}
 Combining Eq.~\eqref{eq:infl-step-k} and~\eqref{eq:infl-step-k+1}, we obtain:
 \begin{align}
-\varphi^k(v_i) &= \sum_{\substack{G^-\\\in VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \bigg[ \varphi(v_i | G^-) + \mathds{1}(z(v_i,v_k|G_j^+)) \bigg] \nonumber \\
+\varphi^k(v_i) &= \sum_{\substack{G^-\\\in VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \bigg[ \varphi(v_i | G^-) + \mathds{1}\big(z(v_i,v_k|G_j^+)\big) \bigg] \nonumber \\
         &= \underbrace{\sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \sum^{k-1}_{j=1}\mathds{P}(G_j^+) }_{A} \nonumber \\
-        &+ \underbrace{\sum_{G^- \in {VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \mathds{1}(z(v_i,v_k|G_j^+)) }_{M_{ik}}. \label{eq:two-parts}
+        &+ \underbrace{\sum_{G^- \in {VG^{k-1}}}\sum^{k-1}_{j=1} \mathds{P}(G_j^+) \mathds{1}\big(z(v_i,v_k|G_j^+)\big) }_{M_{ik}}. \label{eq:two-parts}
 \end{align}
 
 \textbf{Tweet influence at previous time step $t_{k-1}$.}
-Given the definition of $G_j^+$ in Eq.~\eqref{eq:diff-scenario-increase}, we obtain that $\mathds{P}(G_j^+) = \mathds{P}(G^-)\mathds{P}((v_j,v_k\})$.
+Given the definition of $G_j^+$ in Eq.~\eqref{eq:diff-scenario-increase}, we obtain that $\mathds{P}(G_j^+) = \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big)$.
 Consequently, part $A$ in Eq.~\eqref{eq:two-parts} can be written as:
 \begin{align}
-	A 	&= \sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}((v_j,v_k\}) \nonumber \\
-		&= \sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \mathds{P}(G^-) \sum^{k-1}_{j=1} \mathds{P}((v_j,v_k\}) \nonumber \\
+	A 	&= \sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \nonumber \\
+		&= \sum_{G^- \in {VG^{k-1}}} \varphi(v_i | G^-) \mathds{P}(G^-) \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) \nonumber \\
 		&= \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \varphi(v_i | G^-)  \nonumber \\
 	^{cf.~\eqref{eq:brute-user-infl}}	&= \varphi^{k-1}(v_i) \label{eq:past-infl}
 \end{align}
 Consequently, $A$ is the tweet influence of $v_i$ at the previous time step $t_{k-1}$.
-Note that $\sum^{k-1}_{j=1} \mathds{P}((v_j,v_k\}) = 1$ because $v_k$ is necessarily the direct retweet of one of the previous nodes $v_j, j < k$ of the retweet cascade.
+Note that $\sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) = 1$ because $v_k$ is necessarily the direct retweet of one of the previous nodes $v_j, j < k$ of the retweet cascade.
 %For part $A$, what we interested in is that how A relate to $\varphi(u_j)$ in previous timestamps $t_{k-1}$. 
-%We use the fact again that $G_i = G \cup (v_i,v_k\}$. 
-%Thus $\mathds{P}\{G_i\} = \mathds{P}\{G\}\mathds{P}(v_i,v_k\}$. Then A can be expressed as:
+%We use the fact again that $G_i = G \cup (v_i,v_k)$. 
+%Thus $\mathds{P}\{G_i\} = \mathds{P}\{G\}\mathds{P}(v_i,v_k)$. Then A can be expressed as:
 %\[
 %\begin{alignedat}{3}
-%A &= \sum_{G\in{VG^{k-1}}}\sum^{k-1}_{i=0}\mathds{P}\{G\}\mathds{P}(v_i,v_k\}\sum_{\substack{u_v\in{G}\\v>j}}\mathds{P}\{z(u_j,u_v|G)\}\\
-%  &= \sum_{G\in{VG^{k-1}}}\mathds{P}\{G\}\sum^{k-1}_{i=1}\mathds{P}(v_i,v_k\}\sum_{\substack{u_v\in{G}\\v>j}}\mathds{P}\{z(u_j,u_v|G)\}\\
+%A &= \sum_{G\in{VG^{k-1}}}\sum^{k-1}_{i=0}\mathds{P}\{G\}\mathds{P}(v_i,v_k)\sum_{\substack{u_v\in{G}\\v>j}}\mathds{P}\{z(u_j,u_v|G)\}\\
+%  &= \sum_{G\in{VG^{k-1}}}\mathds{P}\{G\}\sum^{k-1}_{i=1}\mathds{P}(v_i,v_k)\sum_{\substack{u_v\in{G}\\v>j}}\mathds{P}\{z(u_j,u_v|G)\}\\
 %\end{alignedat}
 %\]
-%The next importance fact is that $\mathds{P}(v_i,v_k\}$ describe the probability that $v_k$ retweet from any previous user $v_i$ where $v_i \in \{u_1,u_2 ,\cdots, u_{k-1}\} $. Thus $\sum^{k-1}_{i=1}\mathds{P}(v_i,v_k\} $ need to normalize to 1.
+%The next importance fact is that $\mathds{P}(v_i,v_k)$ describe the probability that $v_k$ retweet from any previous user $v_i$ where $v_i \in \{u_1,u_2 ,\cdots, u_{k-1}\} $. Thus $\sum^{k-1}_{i=1}\mathds{P}(v_i,v_k) $ need to normalize to 1.
 %
 %\[
 %\begin{alignedat}{3}
@@ -360,9 +348,9 @@ Note that $\sum^{k-1}_{j=1} \mathds{P}((v_j,v_k\}) = 1$ because $v_k$ is necessa
 With $A$ being the influence of $v_i$ at the previous time step, intuitively $M_{ik}$ is the contribution of $v_k$ to the influence of $v_i$.
 Knowing that:
 \begin{align*}
-	\mathds{P}(G_j^+) &= \mathds{P}(G^-)\mathds{P}((v_j,v_k\}) \text{ and } \\
-	\mathds{1}\{z(v_i,v_k|G_j^+)\} &= \mathds{1}(z(v_i,v_j|G^+_j)) \mathds{1}((v_j,v_k\}) \\
-	 &= \mathds{1}(z(v_i,v_j|G^-))
+	\mathds{P}(G_j^+) &= \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \text{ and } \\
+	\mathds{1}\big(z(v_i,v_k|G_j^+)\big) &= \mathds{1}\big(z(v_i,v_j|G^+_j)\big) \mathds{1}\big((v_j,v_k)\big) \\
+	 &= \mathds{1}\big(z(v_i,v_j|G^-)\big)
 \end{align*}
 we write $M_{ik}$ as:
 %
@@ -371,36 +359,36 @@ we write $M_{ik}$ as:
 %B = M_{jk} &= \sum_{G\in{VG^{k-1}}}\sum^{k-1}_{i=1}\mathds{P}(G_i)\mathds{P}\{z(u_j,v_k|G_i)\} \nonumber \\
 %		   &= \sum_{G\in{VG^k}}\mathds{P}\{G\}\mathds{P}\{z(u_j,v_k|G)\}       
 %\end{align}
-%We know that $G_i = G\cup (v_i,v_k\}$ thus $\mathds{P}\{G_i\} = \mathds{P}\{G_i\} \mathds{P}(v_i,v_k\}$ and $\mathds{P}\{z(u_j,v_k|G_i)\} = \mathds{P}\{z(u_j,v_i|G)\}\mathds{P}(v_i,v_k\}$ so: 
+%We know that $G_i = G\cup (v_i,v_k)$ thus $\mathds{P}\{G_i\} = \mathds{P}\{G_i\} \mathds{P}(v_i,v_k)$ and $\mathds{P}\{z(u_j,v_k|G_i)\} = \mathds{P}\{z(u_j,v_i|G)\}\mathds{P}(v_i,v_k)$ so: 
 \begin{align}
-	M_{ik} &= \sum_{G^- \in {VG^{k-1}}} \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}((v_j,v_k\}) \mathds{1}(z(v_i,v_j|G^-)) \nonumber \\
-           &= \sum^{k-1}_{j=1} \mathds{P}((v_j,v_k\}) \underbrace{ \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \mathds{1}(z(v_i,v_j|G^-))}_{M_{ij}} \nonumber \\  
-		   &= \sum^{k-1}_{j=1} \mathds{P}((v_j,v_k\}) M_{ij} \label{eq:M-ik}
+	M_{ik} &= \sum_{G^- \in {VG^{k-1}}} \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \mathds{1}\big(z(v_i,v_j|G^-)\big) \nonumber \\
+           &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) \underbrace{ \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \mathds{1}\big(z(v_i,v_j|G^-)\big)}_{M_{ij}} \nonumber \\  
+		   &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) M_{ij} \label{eq:M-ik}
 \end{align}
 %By comparing the final and the original form of B:
 %\[
 %\begin{alignedat}{3}
 %B 			   &= \sum_{G\in{VG^k}}\mathds{P}(G)\mathds{P}\{z(u_j,v_k|G)\}\\
-%               &= \sum^{k-1}_{i=1}\bigg[\mathds{P}^2(v_i,v_k\}\sum_{G\in{VG^{k-1}}}\mathds{P}(G)\mathds{P}\{z(u_j,v_i|G)\}\bigg]\\ 
-%M_{jk} &= \sum_{i=1}^{k-1}\bigg[\mathds{P}^2(v_i,v_k\}M_{ji}\bigg]
+%               &= \sum^{k-1}_{i=1}\bigg[\mathds{P}^2(v_i,v_k)\sum_{G\in{VG^{k-1}}}\mathds{P}(G)\mathds{P}\{z(u_j,v_i|G)\}\bigg]\\ 
+%M_{jk} &= \sum_{i=1}^{k-1}\bigg[\mathds{P}^2(v_i,v_k)M_{ji}\bigg]
 %\end{alignedat}
 %\]
 An alternative interpretation for $M_{ik}$ is the influence of $v_i$ over $v_k$.
 Eq.~\eqref{eq:M-ik} can be intuitively understood as the expected influence of $v_i$ over a newly attached node $v_k$ is proportional to the influence of $v_i$ over each already attached node $v_j$ multiplied with the likelihood that $v_k$ attached itself to $v_j$.
 We obtain the formula of the the expected influence of a node $v_i$ over another node $v_k$ as:
 %
-%Through this equation we can observed that $M_{jk}$ which is the influence $u_j$ over $v_k$ can be recursively calculated using $\mathds{P}(v_i,v_k\}$ and $M_{ji}$ which is influence $u_j$ over $v_i$ where $v_i$ is the user that $v_k$ attach to.  Any user in a diffusion can not have the influence on any previous user because there is no directed path pointing back to the previous user. Therefore $M_{jk}(j>k)$ equals zero and the influence on the user itself set to one in default.
+%Through this equation we can observed that $M_{jk}$ which is the influence $u_j$ over $v_k$ can be recursively calculated using $\mathds{P}(v_i,v_k)$ and $M_{ji}$ which is influence $u_j$ over $v_i$ where $v_i$ is the user that $v_k$ attach to.  Any user in a diffusion can not have the influence on any previous user because there is no directed path pointing back to the previous user. Therefore $M_{jk}(j>k)$ equals zero and the influence on the user itself set to one in default.
 \begin{equation} \label{eq:Mij}
 M_{ik}=
 \left\{
 \begin{array}{ll}
-	\sum^{k-1}_{j=1}M_{ij}\mathds{P}((v_j, v_k\}) &,i < k \\
+	\sum^{k-1}_{j=1}M_{ij}\mathds{P}\big((v_j, v_k)\big) &,i < k \\
 	1 & ,i = k \\
 	0 & ,i > k.
 \end{array}
 \right.
 \end{equation} 
-%where $P_{ik}$ is $\mathds{P}^2(v_i,v_k\}$.
+%where $P_{ik}$ is $\mathds{P}^2(v_i,v_k)$.
 
 \textbf{Recursive computation of tweet influence.}
 Using Eq~\eqref{eq:two-parts} and~\eqref{eq:past-infl}, we can recursively compute the influence of $v_i$ at time $t_k$ as:
@@ -425,7 +413,7 @@ Intuitively, the influence of $v_i$ at time $t_k$ is the sum of the expected inf
 \subsection{Tweet influence algorithm}
 
 We define two matrices:
-matrix $P = [ P_{ij} ]$, with $P_{ij} = \mathds{P}((v_i, v_j\})$.
+matrix $P = [ P_{ij} ]$, with $P_{ij} = \mathds{P}\big((v_i, v_j)\big)$.
 Element $P_{ij}$ of the matrix $P$ is the probability that tweet $v_j$ is a direct retweet of tweet $v_i$;
 matrix $M = [ M_{ij} ]$, with $M_{ij}$ defined in Eq.~\eqref{eq:Mij}.
 Element $M_{ij}$ of matrix $M$ is the contribution of $v_j$ to the influence of $v_i$.
@@ -449,4 +437,4 @@ with the value 1 occurring on line $j$.
 For each column $j$, we compute the first $j-1$ elements by multiplying the sub-matrix $M_{[1..j-1, 1..j-1]}$ with the first $j-1$ elements on the $j^{th}$ column of matrix $P$.
 The computation of matrix $M$ finishes in linear time, after $n$ steps, where $n$ is the total number of retweets in the retweet cascade.
 Fig.~\ref{fig:matrix-operations-example} demonstrated the computation of the first four columns in $M$.
-Algorithm~\ref{alg:casin} gives an overview of the efficient influence computation algorithm.
+%Algorithm~\ref{alg:casin} gives an overview of the efficient influence computation algorithm.
