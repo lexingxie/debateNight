@@ -1,0 +1,54 @@
+%!TEX root = main.tex
+
+\section{Discussion}
+ 
+In this paper, we study the influence and the political behavior of socialbots.
+We introduce a novel algorithm for estimating user influence from retweet cascades in which the diffusion structure is not observed.
+%-based  under conditions of incomplete data. Twitter does not provide retweet structures in its data, and simply associates all retweets with the original tweet. 
+%As a result, this obscures crucial information about social communication on the platform, potentially leading to incorrect analyses of retweet activity. 
+%We model the latent diffusion structure using only tweeting time and user features and implemented a scalable algorithm to estimate user influence over all possible diffusion scenarios.
+We propose four measures
+%We apply it 
+to analyze the role and user influence of bots versus humans on Twitter during the 1st U.S. presidential debate of 2016. 
+The first is the user influence, computed over all possible unfoldings of each cascade.
+%The dataset comprised 6,498,818 tweets emitted by 1,451,388 users over a 2-hour duration, containing 200,191 retweet diffusion cascades of size 3 or greater. 
+Second, we use the BotOrNot API to retrieve the botness score for a large number of Twitter users.
+% $\zeta(u) \in [0, 1]$ (0 being likely human, and 1 likely non-human). 
+Lastly, by examining the 1000 most frequently-used hashtags we measure political polarization and engagement. 
+We analyze the interplay of influence, botness and political polarization using a two-dimensional map -- the polarization map.
+We make several novel findings, for example: bots are more likely to be pro-Republican; the average pro-Republican bot is twice as influential as its pro-Democrat counterpart; very highly influential users are more likely to be pro-Democrat; and highly influential bots are mostly pro-Republican.
+
+%7/ I see a need to discuss the algorithm (and model) behind BotOrNot API, because: 
+%
+%an alternative explanation for claims below (intro page 2)
+%> ** bots are more engaged than humans
+%> * bots are more likely to be pro-Republican;
+%
+%
+%
+%can be: 
+%** the API tend to flag more “engaged” account as bots 
+%* if the API uses the same def about republican, e.g. set of keywords (or accidentally use something like network connectivity to a set of known republicans who uses the same hashtags that Tim identified … 
+%
+%to sum up, this is a tough chicken-n-egg question. 
+%it is similar to saying some API flagged a person as “should not allow bail” but it had race as input and the person scored high on that (!)
+\textbf{Validity of analysis with respect to BotOrNot.}
+The BotOrNot algorithm uses tweet content and user activity patterns to predict botness.
+%The results presented in Sec.\ref{sec:results-findings} are not simply due to cofounding 
+However, this does not confound the conclusions presented in Sec.~\ref{sec:results-findings}.
+First, political behavior (polarization and engagement) is computed from a list of hashtags specific to \debate, while the BotOrNot predictor was trained before the elections took place and it has no knowledge of the hashtags used during the debate.
+Second, a loose relation between political engagement and activity patterns could be made, however we argue that engagement is the number of used partisan hashtags, not tweets -- i.e. users can have a high political engagement score after emitting few very polarized tweets.
+
+\textbf{Assumptions, limitations and future work.}
+This work makes a number of simplifying assumptions, some of which can be addressed in future work.
+First, the delay between the tweet crawling (Sept 2016) and computing botness (July 2017) means that a significant number of users were suspended or deleted.
+A future application could see simultaneous tweets and botscore crawling.
+Second, our binary hashtag partisanship characterization does not account for independent voters or other spectra of democratic participation, and future work could evaluate our approach against a clustering approach using follower ties to political actors \cite{barbera.2015}.
+Last, this work computes the expected influence of users in a particular population, but it does not account for the aggregate influence of the population as a whole.
+Future work could generalize our approach to entire populations, which would allow answers to questions like ``Overall, were the Republican bots more influential than the Democrat humans?''.
+
+%To conclude, this paper makes an important and novel contribution to the problem of estimating influence in retweet cascades. 
+%Furthermore, our case study application of this approach to studying bot influence during the U.S. election provides shows that this approach can elicit fundamentally new, and indeed surprising, insights about power and influence in social media platforms such as Twitter. 
+%We note several limitations to this work and suggest areas of future research. \TODO{@MAR}{Technical limitations?}. The application of our method to study bot influence during the 2016 U.S. political election is limited by the time range of tweet activity (90 minutes during the 1st presidential debate and 15 minutes before and after). Further, whilst we managed to classify every user in the dataset using the BotOrNot API, the delay between the Debate and our classification meant that a significant number of users were suspended or deleted. Although we accounted for this in the analysis, the presence of these users is a limiting factor in the findings. The algorithm presented in this paper and its application suggests several key directions for future research. Firstly, \TODO{@MAR}{technical future work?}. 
+%
+%Secondly, \TODO{@ROB}{we present a somewhat simplistic binary characterization of political partisanship that does not, for example, account for independent voters or other spectra of democratic participation. Future work could compare \textbf{TO DO}}. Finally, analysis of a larger dataset of political discussions on Twitter is necessary to verify the empirical results we obtained and test how these generalise more broadly to the political context not only in the US but in other contexts. 

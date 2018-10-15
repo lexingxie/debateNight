@@ -1,0 +1,29 @@
+%!TEX root = main.tex
+%
+Serious concerns have been raised about the role of `socialbots' in manipulating public opinion and influencing the outcome of elections by retweeting partisan content to increase its reach.
+%RJA (26/2) - removed "arbitrarily" because suggests behaviour is random/non-strategic, but in fact there are political goals
+%Socialbots, loosely defined as automated programs that control user profiles on social media, 
+%are estimated to account for between 9-15\% of all Twitter profiles. 
+%For a socialbot, getting other users to retweet their content increases the chances that this content will diffuse through the network and therefore shape and influence public discussion.
+%are suspected of influencing public discussions by arbitrarily retweeting partisan content to increase its reach.
+Here we analyze the role and influence of socialbots on Twitter by determining how they contribute to retweet diffusions.
+We collect a large dataset of tweets during the 1st U.S. presidential debate in 2016 and we analyze its 1.5 million users from three perspectives: user influence, political behavior (partisanship and engagement) and botness.
+First, we define a measure of user influence based on the user's active contributions to information diffusions, i.e. their tweets and retweets. 
+%a function of the contributions to retweet diffusions.
+Given that Twitter does not expose the retweet structure -- it associates all retweets with the original tweet --
+we model the latent diffusion structure using only tweet time and user features, and we implement a scalable novel approach to estimate influence over all possible unfoldings.
+%Given that the real retweet structure is latent, with only 
+%, and implement a novel approach to estimate influence where the retweet cascade structure is latent and only tweet time and the user features are observable.
+%We use the BotOrNot API to obtains the botness -- likelihood of being a bot -- for 1.5 million user accounts. into human and non-human and 
+Next, we use partisan hashtag analysis to quantify user political polarization and engagement.
+Finally, we use the BotOrNot API to measure user \emph{botness} (the likelihood of being a bot).
+We build a two-dimensional ``polarization map'' that allows for a nuanced analysis of the interplay between botness, partisanship and influence.
+We find that not only are socialbots more active on Twitter -- starting more retweet cascades and retweeting more -- but they are 2.5 times more influential than humans, and more politically engaged. 
+%Based on differential usage of partisan hashtags, 
+Moreover, pro-Republican bots are both more influential and more politically engaged than their pro-Democrat counterparts.
+However we caution against blanket statements that software designed to appear human dominates politics-related activity on Twitter.
+%and promoting pro-Republican messages dominated the Twitter information landscape during the U.S. presidential election. 
+Firstly, it is known that accounts controlled by teams of humans (e.g. organizational accounts) are often identified as bots.
+%we note that automated approaches to identifying socialbots may classify as bots accounts controlled by teams of humans (e.g. organizational accounts) and individual Twitter users who use automated scheduling. 
+Secondly, we find that many highly influential Twitter users are in fact pro-Democrat and that most pro-Republican users are mid-influential and likely to be human (low botness).
+%densest area of Republican users 

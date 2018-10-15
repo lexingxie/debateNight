@@ -1,0 +1,314 @@
+%!TEX root = main.tex
+
+%\secmoveup
+\section{Estimating influence in retweet cascades}
+\label{sec:user-influence}
+%\secmoveup
+
+%\verify{ \textbf{Comments from LX:}\\
+%4/ 
+%Sec 3.1 and 3.2 it seems better off to just call ``diffusion graph'' ``diffusion tree''. 
+%this section should say that the tree respects temporal order,  it's unobserved / latent (and why we need to infer the tree)\\
+%5/ 
+%sec 3.2 path z, and $\phi$
+%z should be defined as a sequence of nodes .. 
+%Prob() is the probability of reaching $u_k$ from $u_i$, and $\phi$ would be the \textit{expected number of users reached} using a model of independent binomials to decide whether or not to take each hop in the path (instead of \textit{average number of reachable users} … unclear what it means)
+%}
+
+%\TODO{LX}{assuming the general motivation for inferring hidden tree + user influence was in intro. this sec first define cascade + tree + influence and proceed from there.}
+%In Twitter, a {\em cascade} $C$ of size $n$ is defined as a series of messages $v_i$ sent by user $u_i$ at time $t_i$, i.e. $C=\{v_i(u_i, t_i)\}_{i=1}^n$.
+%Here $v_1 = (u_1, t_1)$ is the initial message, and $v_1, \ldots, v_n$ with $t_1<\ldots<t_n$ are subsequent retweets or resposts of the initial message.
+
+An {\em information cascade} $V$ of size $n$ is defined as a series of messages $v_i$ sent by user $u_i$ at time $t_i$, i.e. $V=\{v_i=(u_i, t_i)\}_{i=1:n}$.
+Here $v_1 = (u_1, t_1)$ is the initial message, and $v_1, \ldots, v_n$ with $t_1<\ldots<t_n$ are subsequent reposts or relays of the initial message.
+In the context of Twitter, the initial message is an original tweet and the subsequent messages are retweets of that original tweet (which by definition, are also tweets).
+A latent retweet diffusion graph $G=(V,E)$ has the set of tweets as its vertexes $V$, and additional edges $E=\{(v_i, v_j)\}$ that represent that the $j^{th}$ tweet is a retweet of the $i^{th}$ tweet, and respects the temporal precedence $t_i<t_j$. 
+Web data sources such as the Twitter API provide cascades, but not the
+diffusion edges. 
+Such missing data makes it challenging to measure a given user's contribution to the diffusion process.
+
+%\TODO{LX}{now we need a precise definition of influence}
+% now define influence
+
+%\TODO{LX}{discussion: does $u$ feel more natural for denoting users in a graph than $v$ (vertex)?}
+
+
+%\secmoveup
+\subsection{Modeling latent diffusions}
+\label{subsec:model-latent-diffusions}
+%\secmoveup
+
+\noindent\textbf{Diffusion scenarios.}
+We focus on tree-structured diffusion graphs, i.e. each node $v_j$ has only one incoming link $(v_i, v_j)$, $i<j$. 
+Denote the set of trees that are consistent with the temporal order in cascade $C$ as ${\cal G}$, we call each diffusion tree a \emph{diffusion scenario} $G \in {\cal G}$.
+Fig.~\ref{fig:side:a} contains a cascade visualized as a star graph, attributing subsequent tweets to the first tweet at $t_1$.
+Fig.~\ref{fig:side:b} shows four example diffusion scenarios consistent with this cascade.
+The main challenge here is to estimate the influence of each user in the cascade, taking into account all possible diffusion trees.
+
+\noindent\textbf{Probability of retweeting.}
+%We define the probability of an edge $\mathds{P}(\{v_i, v_j\})$ as the likelihood that $u_j$ emitted tweet $v_j$ as a direct retweet of $v_i$.
+For each tweet $v_j$, we model the probability of it being a direct descendant of each previous tweet in the same cascade as a weighted softmax function, defined by two main factors:
+%% LX: the extra citations appear to be unecessary here
+%as follows.
+%In line with previous work~\cite{Mishra2016,Zhao2015,Shen2014}, we model two factors:
+%\eat{in the likelihood of retweeting}:
+firstly, users retweet \emph{fresh} content~\cite{Wu2007}.
+We assume that the probability of retweeting decays exponentially with the time difference $t_j - t_i$;
+secondly, users prefer to retweet locally influential users, known as preferential attachment~\cite{Barabasi2005,Rizoiu2017}.
+We measure the local influence $m_i$ of a user $u_i$ using her number of followers~\cite{kwak2010twitter,Cha2010}.
+%The second assumption is that user prefers retweet from a user who has a lot of followers. 
+%The number of followers a user has often related to its number of retweet. 
+%More followers, a user has more channels he can get to broadcast his tweet to others, which increasing the likelihood of seeing by other users~\cite{1,2}.
+%So the probability of retweeting can be express in the following equation:
+We quantify the probability that $v_j$ is a direct retweet of $v_i$ as:
+\begin{equation} \label{eq:prob-edge-mt}
+	p_{ij} = \frac{m_i e^{-r({t_j-t_i})}}{\sum_{k=1}^{j-1} m_k e^{-r({t_j-t_k})}}
+\end{equation}
+%This equation describe the probability that user $u_b$ retweet from user $u_a$ 
+where 
+%$t_a$ and $t_b$ represent the retweet time of $u_a$ and $u_b$ respectively;
+$r$ is a hyper-parameter controlling the temporal decay. 
+It is set to $r = 6.8 \times 10^{-4}$, tuned using linear search on a sample of 20 real retweet cascades (details in the supplement~\cite[annex~D]{supplemental}).
+% and
+%$m_i$ is the number of followers of user $u_i$ (the user of $v_i$).
+%$e^{-r({t_{b}-t_{a}})}$ express the probability decrease in exponential.
+%$G$ is one diffusion scenario which user $u_b$ is added to.
+%The probability of a diffusion scenario is intimately linked to the probability of an edge.
+%\TODO{LX}{this seems to be event rate not probability, i.e. not normalised}
+
+%\secmoveup
+\subsection{Tweet influence in a retweet cascade}
+\label{subsec:user-influence-mt}
+%\secmoveup
+
+% \TODO{LX}{Is this a fair summary of the algorithm:\\ 
+% * diffusion scenarios are the set of trees that are consistent with the cascade (order in time); \\
+% * the algorithms marginalizes over all scenarios to estimate user influence; \\
+% * the algorithm is efficient at $O(N^{XX})$ time; \\
+% * it is non-obvious and potentially new because \ldots}
+
+% assumptions + difficulties
+We additionally assume retweets follow {\em independent conditional diffusions} within a cascade. 
+%s
+This is to say that conditioned on an existing partial cascade of $j-1$ retweets denoted as $V^{(j-1)}=\{v_k\}_{k=1}^{j-1}$ whose underlying diffusion scenario is $G^{(j-1)}$, the $j^{th}$ retweet is attributed to any of the $k=1,\ldots,j-1$ prior tweets according to Eq.~\ref{eq:prob-edge-mt}, and is independent of the diffusion scenario $G^{(j-1)}$. 
+%s
+For example, the $5^{th}$ tweet in the cascade will incur four valid diffusion trees for each of the diffusion scenarios for 4 tweets -- this is illustrated in Fig.~\ref{fig:add-one-edge}. 
+%s
+This simplifying assumption is reasonable, as it indicates that each user $j$ makes up his/her own mind about whom to retweet, and that the history of retweets is available to user $j$ (as is true in the current user interface of Twitter).
+%s
+It is easy to see that under this model, the total number of valid diffusion trees for a 5-tweet cascade is $1\cdot 2\cdot 3\cdot 4=24$, and that for a cascade with $n$ tweets is $(n-1)!$.
+
+The goal for influence estimation for each cascade is to compute the contribution $\varphi(v_i)$ of each tweet $v_i$ {\em averaging} over all independent conditional diffusion trees consistent with cascade $V$ and with edge probabilities prescribed by Eq.~\ref{eq:prob-edge-mt}. 
+%s
+Enumerating all valid trees and averaging is clearly computationally intractable, but the illustration in Fig.~\ref{fig:add-one-edge} lends itself to a recursive algorithm. 
+
+\textbf{Tractable tweet influence computation}
+We introduce the \emph{pair-wise influence score} $m_{ij}$ which measures the influence of $v_i$ over $v_j$.
+$v_i$ can influence $v_j$ both directly when $v_j$ is a retweet of $v_i$, and indirectly when a path exists from $v_i$ to $v_j$ in the underlying diffusion scenario.
+Let $v_k$ be a tweet on the path from $v_i$ to $v_j$ ($i < k < j$) so that $v_j$ is a direct retweet of $v_k$.
+$m_{ik}$ can be computed at the $k^{th}$ recursion step and it measures the influence of $v_i$ over $v_k$ over all possible paths starting with $v_i$ and ending with $v_k$.
+Given the above independent diffusions assumption, the $m_{ij}$ can be computed using $m_{ik}$ to which we add the edge $(v_k, v_j)$.
+User $u_j$ can chose to retweet any of the previous tweets with probability $p_{kj}, k < j$, therefore we further weight the contribution through $v_k$ using $p_{ij}$.
+We consider that a tweet has a unit influence over itself ($m_{ii} = 1$).
+Finally, we obtain that:
+\begin{equation} \label{eq:Mij-mt}
+m_{ij} =
+\left\{
+\begin{array}{ll}
+	\sum^{j-1}_{k=i} m_{ik}p_{kj}^2 &,i < j \\
+	1 & ,i = j \\
+	0 & ,i > j.
+\end{array}
+\right.
+\end{equation}
+
+Naturally, $\varphi(v_i)$ the total influence of node $v_i$ is the sum of $m_{ij}, j > i$ the pair-wise influence score of $v_i$ over all subsequent nodes $v_j$. 
+The recursive algorithm has three steps. 
+\begin{enumerate}
+	\item {\bf Initialization.} $m_{ij}=0$ for $i, j=1,\ldots,n, j \neq i$, and $m_{ii} = 1$ for $i=1,\ldots,n$;
+	\item {\bf Recursion.} For $j=2, \ldots, n$;
+	\begin{enumerate}
+		\item For $k=1, \ldots, j-1$, compute $p_{kj}$ using Eq.~\eqref{eq:prob-edge-mt};
+		\item For $i=1, \ldots, j-1$, $m_{ij} = \sum_{k=i}^{j-1} m_{ik}p_{kj}^2$;
+	\end{enumerate}
+	\item {\bf Termination.} Output $\varphi(v_i)= \sum_{k=i+1}^n m_{ik}$, for $i=1,\ldots,n$. 
+\end{enumerate}
+
+We exemplify this algorithm on a 3-tweet toy example. 
+%s
+%\oldversion{\hl{TO BE UPDATED}
+Consider the cascade $\{v_1, v_2, v_3\}$.
+When the first tweet $v_1$ arrives, we have $m_{11} = 1$ by definition (see Eq.~\eqref{eq:Mij-mt}).
+%
+% and denote $m_{ij}$ as a vector of the m-score values for each node for the first tweet (i.e., $v_1$). 
+%s
+%This is a all-zero vector by definition, as there are no retweets yet. 
+%s
+After the arrival of the second tweet, which must be retweeting the first, we have 
+$m_{12}= m_{11} p^2_{12}=1$, and $m_{22} = 1$ by definition.
+%to account for the influence of $v_1$, 
+%and $\phi^{(2)}_2=\phi^{(2)}_3=0$. 
+%s 
+The third tweet can be a retweet of the first or the second, therefore we obtain: 
+\begin{align*}
+	m_{13} =& m_{11} p^2_{13} + m_{12} p^2_{23} \; ;\\
+	m_{23} =& m_{22} p^2_{23} \; ;\\
+	m_{33} =& 1 \;.
+\end{align*}
+The second term of $m_{13}$ accounts for the indirect influence of $v_1$ over $v_3$ through $v_2$.
+%$\phi^{(3)}_1$ has three terms, the first term denotes the influence node $v_1$ already had on $v_2$, the second term denotes the direct influence of $v_1$ to $v_3$ had node 3 is a retweet of node 1. 
+%The influence of $v_3$ itself is still zero: $\phi^{(3)}_3=0$. Moreover, 
+This is the final step for a 3-node cascade. 
+%The algorithm outputs $[\phi_i]_{i=1:3}=[\phi^{(3)}_i]_{i=1:3}$. 
+%}
+
+%As a sanity check, we can see that $\sum_{i=1}^n \varphi(v_i) = \sum_{j=1}^n \sum_{i=1}^{j-1} \Pd ((v_i,v_j)) = n-1$. In other words, the total influence across all nodes in a cascade of size $n$ is equal to $n-1$, or the number of retweets in this cascade. 
+%In addition, the recursion above permits an in-place implementation, i.e., we incrementally update $\varphi(v_i)$ in step 2, and do not need to keep the intermediate influence values $\phi^{(k)}(v_i)$.
+The computational complexity of this algorithm is $O(n^3)$.
+There are $n$ recursion steps, and calculating $p_{ij}$ at sub-step (a) needs $O(n)$ units of computation, and sub-step (b) takes $O(n^2)$ steps.
+In real cascades containing 1000 tweets, the above algorithm finishes in 34 seconds on a PC.
+For more details and examples, see the online supplement~\cite[annex~B]{supplemental}.
+
+%\oldversion{
+%\textbf{Tweet influence over one diffusion scenario.}
+%Let $z(v_i, v_k) \in G$ be a path in the diffusion scenario $G$ -- i.e a sequence of nodes which starts with $v_i$ and ends with $v_k$.
+%$\mathds{P}(z(v_i, v_k))$ is the probability of reaching $v_k$ from $v_i$.
+%We define $\varphi(v_i | G)$ the influence of $v_i$ in the scenario $G$ as the expected number of users reached from $v_i$ using a model of independent binomials to decide whether or not to take each hop in each path that starts with $v_i$.
+%Formally:
+%\begin{align}
+%	\varphi(v_i|G) 	&= \mathds{E} \left[ \sum_{v_k \in V(G)} \mathds{1} \left\lbrace z(v_i,v_k|G) \right\rbrace \right] \nonumber \\
+%					&= \sum_{v_k \in V(G)} \mathds{E}\bigg[\mathds{1} \left\lbrace z(v_i,v_k|G) \right\rbrace \bigg] \nonumber \\
+%					&= \sum_{v_k \in V(G)} \mathds{P}(z(v_i,v_k|G)) \nonumber \\
+%					&= \sum_{v_k \in V(G)} \prod_{(v_a, v_b) \in z(v_i, v_k)} \mathds{P}\big((v_a, v_b)\big) \label{eq:infl-in-a-scenario-mt}
+%\end{align}
+%where $\mathds{1} \left\lbrace z(v_i,v_k|G) \right\rbrace$ is a function that takes the value 1 when the path from $v_i$ to $v_k$ exists in $G$, and 0 otherwise.
+%
+%\textbf{Tweet influence over a retweet cascade.}
+%
+%
+%We define $\varphi(v_i)$ the influence of $v_i$ over all valid diffusion scenarios $\cal G$:
+%\begin{align}
+%	\varphi(v_i) 	&= \sum_{G\in{\cal G}} \mathds{P}(G) \varphi(v_i|G) \nonumber \\
+%				&= \sum_{G\in{\cal G}} \mathds{P}(G) \sum_{v_k \in V(G)} \mathds{P}\big( z(v_i,v_k|G) \big) \label{eq:brute-user-infl-mt}
+%\end{align}
+%Under the assumption that retweeting events (i.e. edges) occur independently one from another, the probability of a diffusion scenario is:
+%\begin{equation} \label{eq:prob-scenario-mt}
+%	\mathds{P}(G) = \prod_{(v_a, v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
+%\end{equation}
+%
+%It is intractable to directly evaluate Eq.~\eqref{eq:brute-user-infl-mt} (together with Eq.~\eqref{eq:infl-in-a-scenario-mt} and~\eqref{eq:prob-scenario-mt}), particularly due to the factorial number of diffusion scenarios in $\cal G$ (as shown in the online supplement~\cite[annex~A]{supplemental}).
+%%\ref{si-sec:infl-derivation}
+%For example, there are $10^{156}$ diffusion scenarios for a cascade of 100 retweets.
+%We develop, in the next section, an efficient \eat{linear time} algorithm to compute the influence of all tweets\eat{in a retweet cascade}.
+%
+%%\verify{RJA comment: This might be basic question but is the probability threshold 0.5? i.e. estimated prob needs to be greater than 0.5 for there to be edge from from user i to j in retweet cascade?}
+%%% MAR: not really. We don't make a decision based on probabilities, but we work in probability space.
+%%RJA: OK I think I get it now.
+%
+%%\secmoveup
+%\subsection{Tractable tweet influence computation}
+%\label{subsec:casin-algo}
+%%\secmoveup
+%
+%The key observation for a tractable computation of Eq.~\eqref{eq:brute-user-infl-mt} is that tweets $v_k$ are added sequentially at time $t_k$, to each diffusion scenario constructed at time $t_{k-1}$.
+%Adding $v_k$ to a diffusion scenario $G$ has two effects.
+%First, $k-1$ new diffusion scenarios are generated, as $v_k$ can attach to any of the existing $k-1$ nodes.
+%Second, $v_k$ contributes only once to the tweet influence of each tweet that is found on the branch it attaches to and it does not make any other contributions at times $t > t_k$.
+%This process is exemplified in Fig.~\ref{fig:add-one-edge}.
+%Node $v_5$ is added to a given diffusion scenario, generating 4 new diffusion scenarios at time $t_5$.
+%The nodes colored in red see their influence increase as a result of adding $v_5$.
+%%We color in red the nodes whose influence increases as a result of adding node $v_5$.
+%This allows to compute tweet influence incrementally, by updating $\varphi(v_i), i < k$ at each time $t_k$.
+%We denote by $\varphi^k(v_i)$ the value of tweet influence of $v_i$ after adding node $v_k$.
+%Thus, we only keep track of how tweet influence increases as nodes attach and we do not need to construct all diffusion scenarios.
+%
+%We define $M_{ik}$ as the contribution of $v_k$ to the tweet influence of $v_i$, over all possible diffusion scenarios.
+%It can be shown that the influence of $v_i$ increases at time $t_k$ by $M_{ik}$:
+%\begin{equation} \label{eq:iter-computation}
+%	\varphi^k(v_i) = \varphi^{k-1}(v_i) + M_{ik},
+%\end{equation}
+%\begin{equation} \label{eq:Mij-mt}
+%\text{ where } M_{ik} =
+%\left\{
+%\begin{array}{ll}
+%	\sum^{k-1}_{j=1}M_{ij}\mathds{P}^2 \big( (v_j, v_k) \big) &,i < k \\
+%	1 & ,i = k \\
+%	0 & ,i > k.
+%\end{array}
+%\right.
+%\end{equation} 
+%See the online supplement~\cite[annex~B]{supplemental} for the complete derivation from Eq.~\eqref{eq:brute-user-infl-mt} to Eq.~\eqref{eq:iter-computation} and~\eqref{eq:Mij-mt}. %\ref{si-sec:efficient-algo}
+%
+%%\verify{RJA comment: Absolutely not suggesting any change to the above [no time anyway!] but I'm just wondering why a user is allowed to influence herself? I thought it would be $M_{ik} =0, i \geq k$. Doesn't have any impact on the comparative results, of course}
+%%% MAR: we need it for the math. For comparative results, we plot percentiles anyway, so +1 simply puts everyone higher, but does not change order.
+%
+%\textbf{Recursive computation of tweet influence.}
+%$M_{ik}$ can be alternatively interpreted as the influence of tweet $v_i$ over $v_k$.
+%Consequently, we can compute $\varphi^k(v_i)$ the total influence of $v_i$ as the sum of 
+%the individual influences of $v_i$ over each of the other nodes in the diffusion.
+%% influence that $v_i$ has over all the other nodes in the cascade.
+%This can be recursively computed as:
+%\begin{align*}
+%	\varphi^k(v_i) &= \varphi^{k-1}(v_i) + M_{ik} \nonumber \\
+%				   &= \varphi^{k-2}(v_i) + M_{i(k-1)} + M_{ik} = \ldots = \sum_{j=1}^k M_{ij}. 
+%\end{align*}
+%
+%\begin{algorithm}[tbp]
+%\color{gray}
+%  \caption{Compute influence matrix $M$, \hl{LX: $\Pd_{ij}^2$ and matrix $M$ are unclear}}
+%  \label{alg1}
+%  \begin{algorithmic}
+%  \REQUIRE A set of $n$ retweets $\{ v_i = (m_i, t_i) | i = 1,\dots,n\}$
+%  \REQUIRE Parameter $r$ -- temporal decay.
+%  \ENSURE influence matrix $M$
+%
+%  \STATE Initialize matrix $P = [ P_{ij} = 0, \forall i, j = 1,\dots,n]$
+%  \STATE Initialize matrix $M = [ M_{ij} = 0, \forall i, j = 1,\dots,n]$
+%  \STATE $M_{11} = 1$
+%
+%  \FOR{$i=1$ \TO $n$}
+%  		\FOR{$j=i$ \TO $n$}
+%  			\STATE $P_{ij} = m_i e^{-r({t_j-t_i})}$
+%  		\ENDFOR
+%  \ENDFOR
+%  %\STATE \hl{column normalize $P_{ij}$}
+%  \STATE \rvx{$P_{ij} \leftarrow P_{ij}/(\sum_i P_{ij})$}
+%  \STATE \hl{$P_{ij} = P_{ij} \cdot P_{ij}$ (element-wise multiplication)}
+%  
+%  \FOR{$j=2$ \TO $n$} {
+%		\STATE \hl{$M_{[1..j-1, j]} = M_{[1..j-1, 1..j-1]} \times P_{[1:j-1,j]}$}
+%		\STATE $M_{jj} = 1$	
+%  }\ENDFOR
+%
+%  \end{algorithmic}
+%  \label{alg:casin}
+%\end{algorithm}
+%
+%\textbf{Computational complexity for estimating influence.}
+%The scalable influence computation algorithm shown in Algorithm~\ref{alg:casin} uses two matrices:
+%matrix $P = [ P_{ij} ]$, with $P_{ij} = \mathds{P}^2 \big( (v_i, v_j) \big)$ and matrix $M = [ M_{ij} ]$.
+%It computes each column of $M$ sequentially, using Eq.~\eqref{eq:Mij-mt}.
+%%Assuming that matrix multiplications are executed in $O(1)$,
+%%The computation of matrix $M$ finishes after $n$ steps (or rows??). 
+%Recursively computing each column in $M$ takes $O(n^2)$ multiplications/additions, the total computations complexity is $O(n^3)$. 
+%In real cascades containing 1000 tweets, the above algorithm finishes in 34 seconds on a PC.
+%%, where $n$ is the total number of retweets in the retweet cascade.
+%For more details and examples, see the online supplement~\cite[annex~B]{supplemental}.
+%%\ref{si-sec:efficient-algo}
+%\eat{
+%%%LX: moved the following info to Sec 3.1, as it doesn't describe "Computational complexity"
+%Throughout the experiments in Sec.~\ref{sec:evaluation-influence}
+% and~\ref{sec:results-findings}, we set the temporal decay hyper-parameter defined in Eq~\eqref{eq:prob-edge-mt} to $r = 6.8 \times 10^{-4}$, tuned using linear search on a sample of 20 real retweet diffusions (details in the online supplement~\cite[annex~D]{supplemental}). %\ref{si-sec:choose-temp-decay}
+% }
+%
+%}
+
+\subsection{Computing influence of a user}
+\label{subsec:user-influence-measure}
+
+Given $\mathcal{T}(u)$ -- the set of tweets authored by user $u$ --, we define the user influence of $u$ as the mean tweet influence of tweets $v \in \mathcal{T}(u)$:
+\begin{equation} \label{eq:user-infl-casin}
+	\varphi(u) = \frac{\sum_{v \in \mathcal{T}(u)} \varphi(v)}{|\mathcal{T}(u)|}, \mathcal{T}(u) = \{ v | u_v = u\}
+\end{equation}
+To account for the skewed distribution of user influence, we mostly use the normalization --  percentiles with a value of 1 for the most influential user our dataset and 0 for the least influential -- denoted $\varphi(u) \%$ .
+%To account for the skewed distribution of user influence, the results presented in Sec.~\ref{sec:evaluation-influence} and~\ref{sec:results-findings} use the percentile normalized values of user influence with a value of 1 for the most influential user our dataset and 0 for the least influential.

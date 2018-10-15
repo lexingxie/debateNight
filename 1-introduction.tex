@@ -1,0 +1,91 @@
+%!TEX root = main.tex
+
+\section{Introduction}
+
+%\TODO{MAR}{We should emphasize more the relation between ``botness'', automated systems and humans, to include organizational accounts. These have high botness scores and are not humans.}
+%\verify{A key problem is how to classify user accounts who participated in \#DebateNight into those who are human versus those who are bots and/or `highly automated' \cite{Kollanyi.2016.presidentialdebate}. -- from Sec. 4}
+
+Socialbots are broadly defined as ``software processes that are programmed to appear to be human-generated within the context of social networking sites such as Facebook and Twitter'' \cite[p.2]{GehlBakardjieva2016}.
+They have recently attracted much attention and controversy, with concerns that they infiltrated political discourse during the 2016 U.S. presidential election and manipulated public opinion at scale. 
+Concerns were heightened with the discovery that an influential conservative commentator (\textit{@Jenn\_Abrams}, 70,000 followers) and a user claiming to belong to the Tennessee Republican Party (\textit{@TEN\_GOP}, 136,000 followers) 
+-- both retweeted by high-profile political figures and celebrities -- were in fact Russian-controlled bots operated by the Internet Research Agency in St. Petersburg~\cite{abramsDailyBeast,tenGopArticle}.
+%RJA (26/2): removed "distorting conversations between human users" from above as doesn't seem essential
+
+%%
+%who had amassed nearly 70,000 followers and had her tweets picked up by major news media was uncovered as a Russian-controlled bot operated by the Internet Research Agency in St Petersburg~\cite{abramsDailyBeast}. 
+%Similarly, Twitter user \textit{@TEN\_GOP}, who claimed to belong to the Tennessee Republican Party, had accrued over 136,000 followers and was retweeted by high-profile political figures and celebrities was confirmed a Russian-controlled bot that sought to influence influencers and spread disinformation by pretending to represent the Republican Party~\cite{tenGopArticle}.
+
+There are several challenges that arise when conducting large-scale empirical analysis of political influence of bots on Twitter. 
+The first challenge concerns estimating user influence from retweet diffusions, where the retweet relations are unobserved -- the Twitter API assigns every retweet to the original tweet in the diffusion.
+%, rather than the connectivity in the social network.
+Current state-of-the-art influence estimation methods such as ConTinEst~\cite{Du2013} operate on a static snapshot of the diffusion graph, which needs to be inferred from retweet diffusions using approaches like NetRate~\cite{Gomez-Rodriguez2011}.
+This workflow suffers from two major drawbacks: 
+first, the algorithms for uncovering the diffusion graph do not scale to millions of users like in our application;
+second, operating on the diffusion graph estimates the ``potential of being influential'', but it loses information about user activity -- e.g. a less well connected user can still be influential if they tweet a lot.
+%a user might not be very well connected, but she might very active on a particular topic therefore influential.
+The question is \textbf{how to estimate at scale the influence of millions of users from diffusion in which the retweet relation is not observed?}
+%
+%and centrality-based methods like TwitterRank~\cite{} estimate a ``static user influence'' from a snapshot of the social network, but they lose information about the user activity -- e.g. a user might not be very well connected, but she is very active on a particular topic.
+%An additional difficulty is that the retweet relations are unobserved -- the Twitter API assigns every retweet to the original tweet in the diffusion -- and existing algorithm for uncovering the diffusions structure (like NetInf and its extensions~\cite{gomez2010inferring,gomez2013structure,rodriguez2012submodular}) do not scale to millions of users like in our application.
+%How to estimate the user influence from 
+%
+The second challenge lies in determining at scale whether a user is a bot and also her political behavior, as manually labeling millions of users is infeasible.
+%, the scale of the data means it is necessary to identify bots using automated methods and such approaches may classify as bots those accounts controlled by teams of humans (e.g. organizational accounts) and individual Twitter users who use automated scheduling. 
+%It has been estimated that between 10 and 25 percent of tweets sent during the U.S. presidential election originated from bots \cite{Kollanyi.2016,FM7090,Woolley.2017}. 
+%The second challenge is, having identified the bots and the humans, how 
+The question is therefore \textbf{how to leverage automated bot detection approaches 
+%such as BotOrNot~\cite{davisetal.16} 
+to measure the botness of millions of users?
+and how to analyze political behavior (partisanship and engagement) at scale?}
+%\verify{ LX: suggest (1) break this long question into two separate questions! (2) remove the [davisetal.16] citation, as it is asking the general question (regardless of actual bot detection software used) here.}
+% and impact on political discourse
+
+This paper addresses the above challenges using a large dataset (hereafter referred to as \debate) of 6.5 million tweets authored by 1.5 million users that was collected on 26 September 2016 during the 1st U.S. presidential debate.
+
+To address the first challenge, we introduce, evaluate, and apply a novel algorithm to estimate user influence based on retweet diffusions.
+%-based user influence under conditions of incomplete data. Twitter does not provide retweet structures in its data, and simply associates all retweets with the original tweet. As a result, this obscures crucial information about social communication on the platform, potentially leading to incorrect analyses of retweet activity. 
+We model the latent diffusion structure using only time and user features by introducing the \emph{diffusion scenario} -- a possible unfolding of a diffusion -- and its likelihood.
+We implement a scalable algorithm to estimate user influence over all possible diffusion scenarios associated with a diffusion.
+We demonstrate that our algorithm can accurately recover the ground truth on a synthetic dataset.
+We also show that, unlike simpler alternative measures--such as the number of followers, or the mean size of initiated cascades--our influence measure $\varphi$ assigns high scores to both highly-connected users who never start diffusions and to active retweeters with little followership.
+
+We address the second challenge by proposing three new measures (political polarization $\mathcal{P}$, political engagement $\mathcal{E}$ and botness $\zeta$) and by computing them for each user in \debate.
+%First, 
+%we propose two user political partisanship measures (polarization  $\mathcal{P}$ and engagement $\mathcal{E}$) we use a content analysis approach which uses partisan hashtags to compute 
+%In relation to the second challenge (political behavior and influence), 
+We manually compile a list of partisan hashtags and we estimate political engagement based on the tendency to use these hashtags and political polarization based on whether pro-Democrat or pro-Republican hashtags were predominantly used.
+We use the BotOrNot API to evaluate botness and to construct four reference populations -- \Human, \Protected, \Suspended and \Bot.
+We build a two-dimensional visualization -- the \emph{polarization map} -- that enables a nuanced analysis of the interplay between botness, partisanship and influence.
+We make several new and important findings: 
+(1) bots are more likely to be pro-Republican; 
+(2) bots are more engaged than humans, and pro-Republican bots are more engaged than pro-Democrat bots; 
+(3) the average pro-Republican bot is twice as influential as the average pro-Democrat bot; 
+(4) very highly influential users are more likely to be pro-Democrat; and 
+(5) highly influential bots are mostly pro-Republican.
+
+%\\However it is with regard to the estimation of political influence where we make our most significant technical contribution. We propose that the relative influence of humans versus bots, and the partisan sub-groups within each population, is best measured by the contribution of each category of user to retweet diffusion. The complete retweet cascade data is not available via the Twitter API and so we present and evaluate a novel approach to modeling retweet diffusions with self-exciting processes, using observable data on tweet timestamps and user profiles.
+
+%In this paper we address the above challenges directly in a large-scale analysis of bot activity and influence on Twitter during the 1st U.S. presidential debate between Hillary Clinton and Donald Trump, which took place on September 26, 2016. 
+%We use the BotOrNot API \cite{davisetal.16} to classify over 1.5 million Twitter as either human or bots users active during the debate but while previous work \cite{FM7090,Woolley.2017} used BotOrNot to classify \textit{samples} of users participating in election-related Twitter activity we conduct a complete \textit{census} of bots and our analysis also explicitly accounts for the continuum of behavior ranging from "definitely bot" to "definitely human", with a grey area in between containing users who could be either. \verify{RJA comment: need to check that previous authors indeed only used binary bot or not flags}
+%
+% 
+%
+%\verify{TODO - A SUMMARY HERE OF THE TECHNICAL CONTRIBUTIONS OF THE PAPER. We probably need short statement of key empirical findings?}. 
+
+\textbf{The main contributions of this work include:}
+%\squishlist
+\begin{itemize}
+	\item We introduce a \textbf{scalable algorithm to estimate user influence} over all possible unfoldings of retweet diffusions where the cascade structure is not observed;
+	the code is publicly accessible in a Github repository\footnote{Code and partisan hashtag list is publicly available at \url{https://github.com/computationalmedia/cascade-influence}};
+
+	\item We develop two \textbf{new measures of political polarization and engagement} based on usage of partisan hashtags;
+	the list of partisan hashtags is also available in the repository;
+	
+	\item We measure the \textbf{botness of a very large population of users} engaged in Twitter activity relating to an important political event -- the 2016 U.S presidential debates;
+		
+	\item We propose the \textbf{polarization map} -- a novel visualization of political polarization as a function of user influence and botness -- and we use it to gain insights into the influence of bots on the information landscape around the U.S. presidential election.
+	%% OR U.S. political information landscape].
+	%% MAR: I feel that we don't have enough info to support the second.
+%	the information landscape : bot and human behavior,
+%\squishend
+\end{itemize}
