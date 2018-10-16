@@ -3,4 +3,41 @@
 \section{New vs. old influence estimation formula}
 \label{si-sec:new-vs-old-formula}
 
-\TODO{MAR}{Describe the comparison between \emph{new} (us) and \emph{old}  } ({\citep{Rizoiu2018a}})
+%\TODO{MAR}{Describe the comparison between \emph{new} (us) and \emph{old}  } ({\citep{Rizoiu2018a}})
+
+To the attentive reader, it is obvious one subtle difference between the influence algorithm presented in this document (in \cref{si-sec:infl-derivation,si-sec:efficient-algo}) and the algorithm proposed by \citet{Rizoiu2018a}.
+In the latter introduces the \emph{pair-wise influence score} $\overline{m_{ij}}$ defined as:
+\begin{equation} \label{eq:Mij-bar}
+\overline{m_{ij}}=
+\left\{
+\begin{array}{ll}
+	\sum^{j-1}_{k=1} \overline{m_{ik}}p^2_{kj} &,i < k \\
+	1 & ,i = k \\
+	0 & ,i > k
+\end{array}
+\right. \enspace ,
+\end{equation} 
+where $p_{kj} = \mathds{P}\big((v_k, v_j)\big)$ is the retweeting probability defined in \cref{eq:prob-edge}.
+The difference between $\overline{m_{ij}}$ (in \cref{eq:Mij-bar}) and our $m_{ij}$ (in \cref{eq:Mij}) is that the retweeting probability appears squared in \cref{eq:Mij-bar}.
+Consequently, $\overline{m_{ij}}$ cannot be interpreted as a probability -- as opposed to $m_{ij}$ which is the probability that $v_j$ is a direct or indirect retweet of $v_i$.
+
+\textbf{Setup.}
+In this section, we set to investigate the difference between $m_{ij}$ and $\overline{m_{ij}}$ in measuring user influence.
+We construct two datasets of cascades, both containing 1000 cascades.
+The first one is the synthetic dataset employed by \citet{Rizoiu2018a} to test $\overline{m_{ij}}$ with known diffusion structure.
+This dataset contains events related to 100 synthetic users.
+The second dataset is a subset of the \debate dataset (introduced in \citep{Rizoiu2018a}), containing 1000 randomly selected diffusion cascades involving 2310 users.
+
+\textbf{Results.}
+\cref{fig:new-vs-old-infl} shows the relation between $\overline{m_{ij}}$ and $m_{ij}$.
+We present the two measure of influence as percentiles they are not on the same scale, and because this is the way that \citet{Rizoiu2018a} present their results.
+\cref{si-fig:new-old-simulated} shows as a 2D density plot of the percentiles of the two measures.
+We can clearly see that the two measures are strongly correlated (Pearson's $r = 0.9972$).
+\cref{si-fig:new-old-real} shows the distribution of difference between the influence of the users in the retweet diffusion samples evaluated using $m_{ij}$ and $\overline{m_{ij}}$.
+Visibly, most users do not change their influence percentile when measures with each of the two variants.
+Similar conclusions emerge from \cref{fig:new-vs-old-infl}, which shows the 2D density plot when influence is measured on retweet cascades with each of the two variants.
+Despite showing a higher variance than in the synthetic case, most users retain their influence percentile regardless of the influence formula employed.
+
+\textbf{Conclusion.}
+Given that $\overline{m_{ij}}$ and $m_{ij}$ provide very similar empirical results, we conclude that all the analysis and observations introduced in \citep{Rizoiu2018a} for $\overline{m_{ij}}$ also hold for $m_{ij}$.
+However, $m_{ij}$ has the advantage of having a probabilistic interpretation -- the likelihood that $v_j$ is a direct or indirect retweet of $v_i$ -- and a closer connection to the Hawkes point process modeling of information diffusion.
