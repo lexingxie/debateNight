@@ -16,10 +16,12 @@ In Sec.~\ref{subsec:user-influence}, we compute the formula for tweet influence 
 
 \textbf{Diffusion trees.}
 We can represent an online diffusion using a directed tree $G(V, E)$, in which each node has a single parent and the direction of the edges indicates the flow of the information.
-For retweet cascades, the nodes $v \in V$ are individual tweets and each directed edge $e \in E, e = (v_a, v_b)$ (showing the direction $v_a \longrightarrow v_b$) indicates that $v_b$ is a \emph{direct retweet} of $v_a$.
+For retweet cascades, the nodes $v \in V$ are individual tweets and each directed edge $e \in E, e = (v_a, v_b)$ 
+%(showing the direction $v_a \longrightarrow v_b$) 
+indicates that $v_b$ is a \emph{direct retweet} of $v_a$.
 A direct retweet means that $u_b$ -- the user that emitted the tweet $v_b$ -- clicked on the ``Retweet'' option under tweet $v_a$.
-The top panel of Fig.~\ref{fig:example-diffusion-graph-construction} shows an example of such a diffusion tree.
-Note that each node $v$ has associated a time of arrival $t_v$ and that the diffusion tree respects the order of the times of arrival -- i.e. given the edge $e = (v_a, v_b)$, then $t_a < t_b$.
+The top panel of \cref{fig:example-diffusion-graph-construction} shows an example of such a diffusion tree.
+Note that each node (tweet) $v$ has associated a time of arrival $t_v$ and that the diffusion tree respects the order of the times of arrival -- i.e. given the edge $e = (v_a, v_b)$, then $t_a < t_b$.
 The bottom panel of Fig.~\ref{fig:example-diffusion-graph-construction} shows the incremental construction of the diffusion tree shown in top panel:
 node $v_1$ is the root of the tree and the source of the information diffusion; 
 at each time $t_i$, node $v_i$ attaches to the previous tree constructed at time $t_{i-1}$.
@@ -104,19 +106,13 @@ at each time $t_i$, node $v_i$ attaches to the previous tree constructed at time
 \textbf{Diffusion scenarios for retweet cascades.}
 The diffusion tree is not observed for real Twitter retweet cascades, since the Twitter API does not expose the direct retweet relationships.
 Instead, it assigns every retweet in the cascade to the original tweet.
-%
-%The underlying social graph is not observed for real Twitter retweet diffusions. 
-%For data availability reasons, we only observe the order and timing of arrival of nodes.
-%The Twitter API assigns every retweet to the original tweets, regardless of any retweeting chains.
-%Consequently, 
-Every retweet cascades constructed based on raw retweet information from the Twitter API resembles the graph in Fig.~\ref{fig:side:a}.
+All retweet cascades constructed based on the raw retweet information from the Twitter API resembles the graph in Fig.~\ref{fig:side:a}.
 Due to this particular shape, we denote retweet cascades as \emph{stars}.
 However, the API exposes the time of arrival of the retweets $t_i$.
 We denote as a \emph{diffusion scenario} any valid diffusion tree that could be associated with the observed retweet star -- i.e., the edges in the diffusion tree respects the order of arrival of retweets.
 Fig.~\ref{fig:side:b} shows four examples of diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.
 
 \textbf{Constructing diffusion scenarios.}
-%All possible diffusion scenarios need to be constructed. 
 Fig.~\ref{fig:diffusion-scenarios} exemplifies a straight-forward method to enumerate all diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.
 The node $v_1$ is the root node and it is published at time $t_1$;
 tweet $v_2$ occurs at time $t_2$ and it is undoubtedly a direct retweet of $v_1$ -- a directed edge is drawn from $v_1$ to $v_2$. 
@@ -135,54 +131,37 @@ For an observed star of size $k$, there are $(k-1)!$ associated diffusion scenar
 %Eventually $(k-1)!$ number of diffusion scenarios are constructed when a cascade with the size of $k$ is observed.
 
 \textbf{Probability of a diffusion scenario.}
-%We denote as $v_i$ the user that has emitted the tweet $i$.
-Given that in retweet cascades individual edges are not observed,
-%Given that edges in diffusion scenarios are not observed,
-%For diffusion scenarios, the edges (i.e. the direct retweet events) are not observed.
-we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that $u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
-%In line with previous work~\cite{crane2008robust,Mishra2016,Zhao2015,Shen2014,Yu2015},
+Given that individual edges are not observed in retweet cascades, we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that $u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
 We model two factors in the likelihood of retweeting:
 firstly, users retweet \emph{fresh} content~\cite{Wu2007}.
 The probability of the edge $(v_a, v_b)$ decays exponentially with the time difference $t_b - t_a$;
-%The influence of user is exponential decay
 secondly, users prefer to retweet locally influential users, also known as preferential attachment~\cite{Barabasi2005}.
-We measure the local influence of a user using his number of followers~\cite{kwak2010twitter,Cha2010,Rizoiu2017}.
+Similar to previous literature, we measure the local influence of a user using his number of followers~\cite{kwak2010twitter,Cha2010,Rizoiu2018}.
 %The second assumption is that user prefers retweet from a user who has a lot of followers. 
 %The number of followers a user has often related to its number of retweet. 
 %More followers, a user has more channels he can get to broadcast his tweet to others, which increasing the likelihood of seeing by other users~\cite{1,2}.
 %So the probability of retweeting can be express in the following equation:
 We quantify the probability of an edge as:
 \begin{equation} \label{eq:prob-edge}
-	p_{ab} = \mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
+	\mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
 \end{equation}
-%This equation describe the probability that user $u_b$ retweet from user $u_a$ 
 where 
-%$t_a$ and $t_b$ represent the retweet time of $u_a$ and $u_b$ respectively;
 $m_a$ is the number of followers of the user of $u_a$ and
 $r$ controls the temporal decay of the probability.
-%$e^{-r({t_{b}-t_{a}})}$ express the probability decrease in exponential.
-%$G$ is one diffusion scenario which user $u_b$ is added to.
-%The probability of a diffusion scenario is intimately linked to the probability of an edge.
 
 Under the assumption that retweeting events (i.e. edges) occur independently one from another, we obtain the probability of a diffusion scenario as:
-%
-%\textbf{Probability of diffusion scenarios.}
-%As we describe above, one diffusion is constructed by a sequence of retweeting edges. 
-%Each user $u_b$ will retweet from another user $u_a$ in its parent scenario with probability $\mathds{P}(u_a,u_b)$. 
-%As each rewteet represent an egde $e$ in diffusion scenario.Thus, we can obtain the probability of a diffusion scenarios $\mathds{P}(G)$ via:
 \begin{equation} \label{eq:prob-scenario}
 	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
 \end{equation}
 
-Note that the above assumption of independence of retweet events is a strong assumption.
-Current state-of-the-art approaches~\cite{Mishra2016,Zhao2015} for modeling retweet cascades employ self-exciting point processes, in which the arrival of one event increases the probability of future events.
-However, for our application of estimating the probability of a diffusion scenario it is the simplest assumption.
-Additional arguments in its favor are also that we are studying networks of events
-%\verify{RJA comment: Re. above assumption that retweeting events are independent of one another: it could be emphasised here that this assumption is valid because we are studying retweet cascades i.e. it is a network of events 
-(in which each event is identified with unique user), not networks of users. 
-The interdependence often observed in socially generated networks (like triadic closure)
+Note that the independence of retweet events is a strong assumption; however, the same assumption is made by most state-of-the-art approaches for modeling retweet cascades~\cite{Mishra2016,Zhao2015} which employ self-exciting point processes -- the arrival of one event increases the probability of future events by modulating the event intensity, while individual event times are considered independent.
+In fact, one could argue that the retweeting probability defined in \cref{eq:prob-edge} is a soft-max version of the decaying kernel function of a Hawkes self-exciting process.
+%However, for our application of estimating the probability of a diffusion scenario it is the simplest assumption.
+%An additional argument in the favor of the independence assumption is that we are studying networks of events
+%%\verify{RJA comment: Re. above assumption that retweeting events are independent of one another: it could be emphasised here that this assumption is valid because we are studying retweet cascades i.e. it is a network of events 
+%(in which each event is identified with unique user), not networks of users. 
+%The interdependence often observed in socially generated networks (like triadic closure) can be ignored in edge formation within a particular retweet cascade.
 %e.g. reciprocity, triangles by construction 
-can be ignored in edge formation within a particular retweet cascade. 
 %It's a directed acyclic graph (if I've got the right term?)}
 
 \input{fig1-model}
@@ -190,7 +169,7 @@ can be ignored in edge formation within a particular retweet cascade.
 \subsection{Computing tweet influence}
 \label{subsec:user-influence}
 
-\cite{Du2013} define user influence of a user $u$ as the average number of users in the social network who get in contact with the content emitted by $u$.
+\citet{Du2013} define user influence of a user $u$ as the average number of users in the social network who get in contact with the content emitted by $u$.
 For retweet cascades the diffusion tree is not observed; it is impossible to directly measure user influence, apart from the root user.
 We define the \emph{tweet influence} over a retweet cascade as the expected number of time it is retweeted -- direct retweets or descendants in a diffusion scenario --, over all possible diffusion scenarios associated with the given star.
 Finally, we compute the influence of user $u$ as the sum of the influences of the tweets that $u$ authored.
@@ -231,7 +210,7 @@ We compute the influence of tweet $v_i$ over $VG$ -- all possible diffusion scen
 %\begin{equation} \label{eq:user-infl-definition}
 %\varphi(u) = \sum_{G\in{VG}}\mathds{P}\{G\} \sum_{u \in G}\prod_{\{u_a,u_b\} \in z}\frac{f(u_a)}{\sum_{u\in {G}}f(u)}e^{-r({t_{b}-t_{a}})}
 %\end{equation}
-It is intractable to directly evaluate Eq.~\eqref{eq:brute-user-infl}, plugged in with Eq.~\eqref{eq:prob-scenario} and~\eqref{eq:infl-in-a-scenario}, particularly due to the factorial number of diffusion scenarios in $VG$.
+It is intractable to directly evaluate \cref{eq:brute-user-infl}, plugged in with \cref{eq:prob-scenario,eq:infl-in-a-scenario}, particularly due to the factorial number of diffusion scenarios in $VG$.
 %It is challenging to compute Eq.~\eqref{eq:user-infl-definition} directly, particularly given that the number of diffusion scenarios is factorial with the size of diffusion cascade.
 For example, there are $10^{156}$ diffusion scenarios for a cascade of 100 retweet.
 We develop, in the next section, an efficient linear time algorithm to compute the influence of all tweets in a retweet cascade.
@@ -242,9 +221,9 @@ We develop, in the next section, an efficient linear time algorithm to compute t
 
 The key observation is that each tweet $v_k$ is added simultaneously at time $t_k$ to all diffusion scenarios constructed at time $t_{k-1}$.
 $v_k$ contributes only once to the tweet influence of each tweet that is found on the branch it attached to.
-This process is exemplified in Fig.~\ref{fig:add-one-edge}.
+This process is exemplified in \cref{fig:add-one-edge}.
 Node $v_5$ is added to a given diffusion scenario, generating 4 new diffusion scenarios at time $t_5$.
-We color in red the nodes whose influence increases as a result of adding node $v_5$.
+We color in red the nodes for which their influence increases as a result of adding node $v_5$.
 %
 %The key observation to efficiently compute user influence is that users $v_k$ are sequentially added to the diffusion scenarios constructed at time $t_k$. 
 %If we ignore $v_k$, the structure of all previous diffusion scenarios remains unchanged. 
@@ -350,7 +329,7 @@ Knowing that:
 \begin{align*}
 	\mathds{P}(G_j^+) &= \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \text{ and } \\
 	\mathds{1}\big(z(v_i,v_k|G_j^+)\big) &= \mathds{1}\big(z(v_i,v_j|G^+_j)\big) \mathds{1}\big((v_j,v_k)\big) \\
-	 &= \mathds{1}\big(z(v_i,v_j|G^-)\big)
+	 &= \mathds{1}\big(z(v_i,v_j|G^-)\big) \mathds{1}\big((v_j,v_k)\big)
 \end{align*}
 we write $m_{ik}$ as:
 %
@@ -362,8 +341,8 @@ we write $m_{ik}$ as:
 %We know that $G_i = G\cup (v_i,v_k)$ thus $\mathds{P}\{G_i\} = \mathds{P}\{G_i\} \mathds{P}(v_i,v_k)$ and $\mathds{P}\{z(u_j,v_k|G_i)\} = \mathds{P}\{z(u_j,v_i|G)\}\mathds{P}(v_i,v_k)$ so: 
 \begin{align}
 	m_{ik} &= \sum_{G^- \in {VG^{k-1}}} \sum^{k-1}_{j=1} \mathds{P}(G^-)\mathds{P}\big((v_j,v_k)\big) \mathds{1}\big(z(v_i,v_j|G^-)\big) \nonumber \\
-           &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) \underbrace{ \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \mathds{1}\big(z(v_i,v_j|G^-)\big)}_{M_{ij}} \nonumber \\  
-		   &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) M_{ij} \label{eq:M-ik}
+           &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) \underbrace{ \sum_{G^- \in {VG^{k-1}}} \mathds{P}(G^-) \mathds{1}\big(z(v_i,v_j|G^-)\big)}_{m_{ij}} \nonumber \\  
+		   &= \sum^{k-1}_{j=1} \mathds{P}\big((v_j,v_k)\big) m_{ij} \label{eq:M-ik}
 \end{align}
 %By comparing the final and the original form of B:
 %\[
@@ -415,8 +394,8 @@ Intuitively, the influence of $v_i$ at time $t_k$ is the sum of the expected inf
 \subsection{Tweet influence algorithm}
 
 We define two matrices:
-matrix $P = [ P_{ij} ]$, with $P_{ij} = \mathds{P}\big((v_i, v_j)\big)$.
-Element $P_{ij}$ of the matrix $P$ is the probability that tweet $v_j$ is a direct retweet of tweet $v_i$;
+matrix $P = [ p_{ij} ]$, with $p_{ij} = \mathds{P}\big((v_i, v_j)\big)$.
+Element $p_{ij}$ of the matrix $P$ is the probability that tweet $v_j$ is a direct retweet of tweet $v_i$ (defined in \cref{eq:prob-edge});
 matrix $M = [ m_{ij} ]$, with $m_{ij}$ defined in Eq.~\eqref{eq:Mij}.
 Element $m_{ij}$ of matrix $M$ is the contribution of $v_j$ to the influence of $v_i$.
 Alternatively, $m_{ij}$ can be interpreted as the influence of $v_i$ on $v_j$.
@@ -438,5 +417,5 @@ M_{[1..j-1, 1..j-1]} \times P_{[1:j-1,j]} \\
 with the value 1 occurring on line $j$.
 For each column $j$, we compute the first $j-1$ elements by multiplying the sub-matrix $M_{[1..j-1, 1..j-1]}$ with the first $j-1$ elements on the $j^{th}$ column of matrix $P$.
 The computation of matrix $M$ finishes in linear time, after $n$ steps, where $n$ is the total number of retweets in the retweet cascade.
-Fig.~\ref{fig:matrix-operations-example} demonstrated the computation of the first four columns in $M$.
+\cref{fig:matrix-operations-example} shows the computation of the first four columns in $M$.
 %Algorithm~\ref{alg:casin} gives an overview of the efficient influence computation algorithm.
