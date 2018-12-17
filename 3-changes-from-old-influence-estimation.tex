@@ -6,7 +6,7 @@
 %\TODO{MAR}{Describe the comparison between \emph{new} (us) and \emph{old}  } ({\citep{Rizoiu2018a}})
 
 To the attentive reader, it is obvious one subtle difference between the influence algorithm presented in this document (in \cref{si-sec:infl-derivation,si-sec:efficient-algo}) and the algorithm proposed by \citet{Rizoiu2018a}.
-In the latter introduces the \emph{pair-wise influence score} $\overline{m_{ij}}$ defined as:
+The latter introduces the \emph{pair-wise influence score} $\overline{m_{ij}}$ defined as:
 \begin{equation} \label{eq:Mij-bar}
 \overline{m_{ij}}=
 \left\{
@@ -24,16 +24,16 @@ Consequently, $\overline{m_{ij}}$ cannot be interpreted as a probability -- as o
 \textbf{Setup.}
 In this section, we set to investigate the difference between $m_{ij}$ and $\overline{m_{ij}}$ in measuring user influence.
 We construct two datasets of cascades, both containing 1000 cascades.
-The first one is the synthetic dataset employed by \citet{Rizoiu2018a} to test $\overline{m_{ij}}$ with known diffusion structure.
-This dataset contains events related to 100 synthetic users.
-The second dataset is a subset of the \debate dataset (introduced in \citep{Rizoiu2018a}), containing 1000 randomly selected diffusion cascades involving 2310 users.
+The first one is the synthetic dataset employed by \citet{Rizoiu2018a} to test $\overline{m_{ij}}$, and it has a known diffusion structure.
+It contains the events related to 100 synthetic users.
+The second dataset is a subset of the \debate dataset (introduced in \citep{Rizoiu2018a}), and it contains 1000 randomly selected diffusion cascades involving 2310 users.
 
 \textbf{Results.}
 \cref{fig:new-vs-old-infl} shows the relation between $\overline{m_{ij}}$ and $m_{ij}$.
-We present the two measure of influence as percentiles they are not on the same scale, and because this is the way that \citet{Rizoiu2018a} present their results.
-\cref{si-fig:new-old-simulated} shows as a 2D density plot of the percentiles of the two measures.
+We present the two measure of influence ($\overline{m_{ij}}$ and $m_{ij}$) as percentiles because they are not on the same scale, and also because this is the way that \citet{Rizoiu2018a} present their results.
+\cref{si-fig:new-old-simulated} shows the 2D density plot, with  the percentiles of $\overline{m_{ij}}$ and $m_{ij}$ on the x-axis and y-axis, respectively.
 We can clearly see that the two measures are strongly correlated (Pearson's $r = 0.9972$).
-\cref{si-fig:new-old-real} shows the distribution of difference between the influence of the users in the retweet diffusion samples evaluated using $m_{ij}$ and $\overline{m_{ij}}$.
+\cref{si-fig:new-old-real-diff} shows the distribution of difference between the influence of the users in the real retweet diffusion samples, evaluated using $m_{ij}$ and $\overline{m_{ij}}$.
 Visibly, most users do not change their influence percentile when measures with each of the two variants.
 Similar conclusions emerge from \cref{fig:new-vs-old-infl}, which shows the 2D density plot when influence is measured on retweet cascades with each of the two variants.
 Despite showing a higher variance than in the synthetic case, most users retain their influence percentile regardless of the influence formula employed.
