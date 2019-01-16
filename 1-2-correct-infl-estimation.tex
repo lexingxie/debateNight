@@ -6,7 +6,19 @@
 \section{Background: data availability in retweet cascades}
 \label{sec:background}
 
-\TODO{LX}{to be self-contained, we need to add a few sentences saying what data is missing from retweet cascades. Either directly quote text from (Rizoiu2018), or significantly paraphrase.}
+Retweet cascades are commonly studied in social media research, as they
+can be used to measure virality and popularity of a given piece of content~\cite{Mishra2016,Zhao2015},
+or compare the effects of different messaging surrounding the same content~\cite{tan2014effect}.
+
+Retweet cascades are naturally tree-structured and ordered in time.
+For example, person A writes a tweet, it can be retweeted by person B and person C.
+Sometime after, person D can retweet when she sees the retweet by person B
+not via the original tweet by person A. In this case, the link $B \rightarrow D$ is called
+a {\em diffusion edge}.
+Web data sources such as the Twitter
+API provide cascades, but not the diffusion edges. Such
+missing data makes it challenging to measure a given user’s
+contribution to the diffusion process.
 
 \section{Derivation of the influence formula}
 \label{si-sec:infl-derivation}
