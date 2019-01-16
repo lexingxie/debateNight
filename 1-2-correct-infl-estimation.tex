@@ -20,7 +20,7 @@ API provide cascades, but not the diffusion edges. Such
 missing data makes it challenging to measure a given user’s
 contribution to the diffusion process.
 
-\section{Derivation of the influence formula}
+\section{Defining the graph of influence}
 \label{si-sec:infl-derivation}
 
 In this section, we detail the calculation of the tweet influence $\varphi(v)$, proposed by~\citet{Rizoiu2018a}.
@@ -131,19 +131,24 @@ where
 $m_a$ is the number of followers of the user of $u_a$ and
 $r$ controls the temporal decay of the probability.
 
+\TODO{MAR}{Independence is not the correct way to compute $P(G)$ here.
+The probability of an edge conditioned on all previous edges are. Eq(2) isn't true, but the underlying computation is okay, due to temporal precedence.}
+\verify{
 Under the assumption that retweeting events (i.e. edges) occur independently one from another, we obtain the probability of a diffusion scenario as:
 \begin{equation} \label{eq:prob-scenario}
 	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
 \end{equation}
 
+
 Note that the independence of retweet events is a strong assumption; however, the same assumption is made by most state-of-the-art approaches for modeling retweet cascades~\cite{Mishra2016,Zhao2015} which employ self-exciting point processes -- the arrival of one event increases the probability of future events by modulating the event intensity, while individual event times are considered independent.
 In fact, one could argue that the retweeting probability defined in \cref{eq:prob-edge} is a soft-max version of the decaying kernel function of a Hawkes self-exciting process.
+}
 
 \TODO{LX}{say where Eq(1) comes from, and also say that one can estimate parameter $r$.}
 
 \input{fig1-model}
 
-\subsection{Computing tweet influence}
+\section{Computing tweet influence}
 \label{subsec:user-influence}
 
 \citet{Du2013} define user influence of a user $u$ as the average number of users in the social network who get in contact with the content emitted by $u$.
