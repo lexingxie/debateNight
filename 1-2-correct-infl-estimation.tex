@@ -28,8 +28,8 @@ In this section, we detail the calculation of the tweet influence $\varphi(v)$, 
 In Sec.~\ref{subsec:diffusion-scenario}, we define the notion of diffusion scenario, and we compute its likelihood given an observed retweet cascade.
 In Sec.~\ref{subsec:user-influence}, we compute the formula for tweet influence over all possible diffusion scenarios associated with the given cascade.
 
-\subsection{Diffusion scenarios}
-\label{subsec:diffusion-scenario}
+%\subsection{Diffusion scenarios}
+%\label{subsec:diffusion-scenario}
 
 \textbf{Diffusion trees.}
 We can represent an online diffusion using a directed tree $G(V, E)$, in which each node has a single parent and the direction of the edges indicates the flow of the information.
@@ -95,7 +95,7 @@ We denote as a \emph{diffusion scenario} any valid diffusion tree that could be 
 Fig.~\ref{fig:side:b} shows four examples of diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.
 
 \textbf{Constructing diffusion scenarios.}
-Fig.~\ref{fig:diffusion-scenarios} exemplifies a straight-forward method to enumerate all diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.
+\verify{Fig.~\ref{fig:diffusion-scenarios} exemplifies a straight-forward method to enumerate all diffusion scenarios associated with the star in Fig.~\ref{fig:side:a}.}\TODO{MAR}{I'm confused by the sentence before. cross ref error?}
 The node $v_1$ is the root node and it is published at time $t_1$;
 tweet $v_2$ occurs at time $t_2$ and it is undoubtedly a direct retweet of $v_1$ -- a directed edge is drawn from $v_1$ to $v_2$.
 Tweet $v_3$ observed at $t_3$ can be a direct retweet of either tweet $v_1$ or tweet $v_2$.
@@ -105,20 +105,17 @@ Similarly, $v_4$ can be a direct retweet of $v_1$, $v_2$ or $v_3$, in either $G_
 Consequently, at time $t_4$ there are 6 possible diffusion scenarios.
 The process continues until all nodes have been attached.
 For an observed star of size $k$, there are $(k-1)!$ associated diffusion scenarios.
-%Then two directed edges are drawn from $u_1$ to $u_3$ and $u_2$ to $u_3$.
-%Thus, two diffusion scenarios $G_1$ and $G_2$ are constructed due to the different users to retweet.
-%When the fourth user appears, it can retweet from $u_1$ to $u_3$ in any of previous diffusion scenarios.
-%This process will continue till the last user we observe.
-%Then All possible diffusion scenarios are built by sequentially adding users to previous diffusion scenarios.
-%Eventually $(k-1)!$ number of diffusion scenarios are constructed when a cascade with the size of $k$ is observed.
+
 
 \textbf{Probability of a diffusion scenario.}
-Given that individual edges are not observed in retweet cascades, we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that $u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
+Given that individual edges are not observed in retweet cascades, we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that
+\rvt{$v_a$ triggered retweet $v_b$.}
+%$u_b$ emitted tweet $v_b$ as a direct retweet of $v_a$.
 We model two factors in the likelihood of retweeting:
 firstly, users retweet \emph{fresh} content~\cite{Wu2007}.
 The probability of the edge $(v_a, v_b)$ decays exponentially with the time difference $t_b - t_a$;
 secondly, users prefer to retweet locally influential users, also known as preferential attachment~\cite{Barabasi2005}.
-Similar to previous literature, we measure the local influence of a user using his number of followers~\cite{kwak2010twitter,Cha2010,Rizoiu2018}.
+Similar to previous literature, we measure the local influence using the number of followers~\cite{kwak2010twitter,Cha2010,Rizoiu2018}.
 %The second assumption is that user prefers retweet from a user who has a lot of followers.
 %The number of followers a user has often related to its number of retweet.
 %More followers, a user has more channels he can get to broadcast his tweet to others, which increasing the likelihood of seeing by other users~\cite{1,2}.
@@ -128,8 +125,20 @@ We quantify the probability of an edge as:
 	\mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
 \end{equation}
 where
-$m_a$ is the number of followers of the user of $u_a$ and
-$r$ controls the temporal decay of the probability.
+$m_a$ is the number of followers of the user $u_a$ and
+parameter $r$ controls the temporal decay of the probability.
+%\TODO{LX}{say where Eq(1) comes from, and also say that one can estimate parameter $r$.}
+\rvt{
+Note that this form of triggering probababilities is identical
+with what is described in a Hawkes process where the branching structure
+is unobserved~\cite{lewis2011nonparametric}. In point process literature,
+such probabilities of pair-wise triggering relationships are typically used
+in parameter estimation procedures such as Expectation-Maximization (EM).
+In other words, Equation~\ref{eq:prob-edge} expresses edge probabilities
+if the retweet events in time were generated by a Hawkes process.
+This observation will allow parameter $r$ to be estimated from data using
+maximum likelihood. 
+}
 
 \TODO{MAR}{Independence is not the correct way to compute $P(G)$ here.
 The probability of an edge conditioned on all previous edges are. Eq(2) isn't true, but the underlying computation is okay, due to temporal precedence.}
@@ -144,7 +153,7 @@ Note that the independence of retweet events is a strong assumption; however, th
 In fact, one could argue that the retweeting probability defined in \cref{eq:prob-edge} is a soft-max version of the decaying kernel function of a Hawkes self-exciting process.
 }
 
-\TODO{LX}{say where Eq(1) comes from, and also say that one can estimate parameter $r$.}
+
 
 \input{fig1-model}
 
