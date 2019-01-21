@@ -106,7 +106,7 @@ Consequently, at time $t_4$ there are 6 possible diffusion scenarios.
 The process continues until all nodes have been attached.
 For an observed star of size $k$, there are $(k-1)!$ associated diffusion scenarios.
 
-\TODO{LX}{Need a definition of ``the set of all diffusion scenarios (aka valid graphs) for a given set of nodes'', this is needed in the next section. Suggestion this to be $\Upsilon(v_{1:k})$.}
+\TODO{LX}{Need a definition of ``the set of all diffusion scenarios (aka valid graphs) for a given set of nodes'', this is needed in the next section. Suggestion this to be $\Upsilon(v_{1:k})$ -- defined at the end of this section.}
 
 \textbf{Probability of a diffusion scenario.}
 Given that individual edges are not observed in retweet cascades, we define the probability of an edge $\mathds{P}\big((v_a, v_b)\big)$ as the likelihood that
@@ -121,9 +121,10 @@ Similar to previous literature, we measure the local influence using the number 
 %The number of followers a user has often related to its number of retweet.
 %More followers, a user has more channels he can get to broadcast his tweet to others, which increasing the likelihood of seeing by other users~\cite{1,2}.
 %So the probability of retweeting can be express in the following equation:
-We quantify the probability of an edge as:
+%We quantify the probability of an edge as:
+\rvt{We use a softmax function to define probability of an edge $(v_a, v_b)$, and define its shorthand as $p_{ab}$.}
 \begin{equation} \label{eq:prob-edge}
-	\mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
+	p_{ab} := \mathds{P}\big((v_a, v_b)\big) = \frac{m_a e^{-r({t_b-t_a})}}{\sum_{k=1}^{b-1} m_k e^{-r({t_b-t_k})}}
 \end{equation}
 where
 $m_a$ is the number of followers of the user $u_a$ and
@@ -145,8 +146,8 @@ maximum likelihood.
 The probability of an edge conditioned on all previous edges are. Eq(2) isn't true, but the underlying computation is okay, due to temporal precedence. Proposed fix is in the next para, in green.}
 \verify{
 Under the assumption that retweeting events (i.e. edges) occur independently one from another, we obtain the probability of a diffusion scenario as:
-\begin{equation} \label{eq:prob-scenario}
-	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
+\begin{equation}
+	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big) \label{eq:prob-scenario1}
 \end{equation}
 
 Note that the independence of retweet events is a strong assumption; however, the same assumption is made by most state-of-the-art approaches for modeling retweet cascades~\cite{Mishra2016,Zhao2015} which employ self-exciting point processes -- the arrival of one event increases the probability of future events by modulating the event intensity, while individual event times are considered independent.
@@ -155,18 +156,31 @@ In fact, one could argue that the retweeting probability defined in \cref{eq:pro
 
 \rvt{
 Notice that each valid diffusion graph $G$ is a tree,
-since the set of tweets $v_1:k$ are ordered in time,
-and each retweet $v_i,~i=2,\ldots,k$ is triggered by one and only one parent among $v_{1:i-1}$.
+since the set of tweets $v_{1:k}$ are ordered in time,
+and each retweet $v_i,~i=2,\ldots,k$ is triggered by one and only one parent among $v_{1:k-1}$.
 With a slight abuse of notation,
 we use $G^{k}$ to denote {\em one} of the valid diffusion trees
-containing the first k tweets $v_1:k$, and $G^{k+1} = G^i \bigcup (v_i, v_{k+1})$, $i\in {1,\ldots,k}$
-to denote {\em one} of the valid diffusion trees of $k+1$ tweets, in which the last tweet $v_{k+1}$ is triggered by
+containing the first k tweets $v_1:k$, and $G^{k+1} = G^k \bigcup (v_i, v_{k+1})$, $i\in {1,\ldots,k}$
+to denote {\em one} of the valid diffusion trees of $k+1$ tweets,
+in which the last tweet $v_{k+1}$ is triggered by
 the i$^{th}$ tweet $v_i$.
-\begin{equation} \label{eq:prob-scenario}
-	\mathds{P}(G) = \prod_{(v_a,v_b) \in E} \mathds{P}\big((v_a, v_b)\big)
-\end{equation}
-}
+Using Bayes rule, we obtain the recursive relationship
+between the probability of observing graph $G^{k+1}$ and $G^{k}$
+\begin{align}
+	\mathds{P}(G^{k+1}) =&~ \mathds{P}(G^{k+1} | G^{k}) \mathds{P}(G^{k}) \label{eq:prob-scenario} \\
+	=&~ \mathds{P}((v_i, v_{k+1})) \mathds{P}(G^{k})  \nonumber \\
+	=&~ p_{i,k+1} \mathds{P}(G^{k})  \nonumber
+\end{align}
+Assume graph $G^{k}$ contains the set of edges denoted by $(v_i, v_j) \in G^{k}$, then
+\begin{align}
+	\mathds{P}(G^{k})=~ \prod_{(v_i, v_j) \in G^{k}} p_{i,j} \label{eq:prob-graph}
+\end{align}
 
+Furthermore, we denote the set of all valid graphs that respect
+the temporal ordering of $v_{1:k}$ as $\Upsilon(v_{1:k})$, abbreviated as $\Upsilon_{k}$.
+Specifically, $\Upsilon_{k}$ contains all valid diffusion trees:
+$$\Upsilon_{k} = \{G^{k}_u,~ u=1,\ldots,|\Upsilon_{k}| \}.$$
+}
 
 
 \input{fig1-model}
@@ -194,14 +208,15 @@ Formally:
 	\varphi(v_i|G) 	=  \sum_{v_k \in V(G)} \mathds{1} \big(z(v_i,v_k | G) ) \label{eq:infl-in-a-scenario}
 \end{equation}
 \verify{where $\mathds{1} \left( z(v_i,v_k|G) \right)$ is a function that takes the value 1 when the path from $v_i$ to $v_k$ exists in $G$.}
-\TODO{LX}{The notation between the two pieces of red texts here is very confusing: $z(v_i, v_k)$ is already declared to be part of $G$, and $z(v_i, v_k)$ is an (ordered) set not probability. What is $z(v_i,v_k | G)$ then?}
-\verify{\hl{Suggestion: Eq(4) has a probablistic interpretation, just keep that, and remove this section.}}
+
+\TODO{LX}{The notation between the two pieces of red texts above is very confusing: $z(v_i, v_k)$ is already declared to be part of $G$, and $z(v_i, v_k)$ is an (ordered) set not probability. What is $z(v_i,v_k | G)$ then?}
+%\hl{Suggestion: Eq \ref{eq:infl-in-a-scenario} has a probablistic interpretation, just keep that, and remove this section.}
 
 
 \textbf{Tweet influence over a retweet cascade.}
 We compute the influence of tweet $v_i$
 \verify{over $VG$ -- all possible diffusion scenarios associated with a retweet cascade -- as:}
-\TODO{LX}{the two letter notation $VG$ should have been defined in the last section. See the suggested def of $\Upsilon(v_{1:k})$.}
+\TODO{LX}{$VG$ has never been defined. Suggest defining it in the last section as $\Upsilon(v_{1:k})$. Avoid two-letter notations!}
 \verify{
 \begin{align}
 	\varphi(v_i) 	&= \sum_{G\in{\Upsilon(v_{1:k})}} \mathds{P}(G) \varphi(v_i|G) \nonumber \\
